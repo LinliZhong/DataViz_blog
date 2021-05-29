@@ -29,7 +29,7 @@ The above picture shows the original data visualization.
 
 **3. The title of the graph is problematic.** If we open the origin dataset and order the data, we may find the top six trading regions are not these six places. This will be misleading to the readers as they may treat these six regions as the top trading regions from 2019 to 2020. Hence, the title should delete the word “Top”.
 
-**4.The data range for these six graphs are from 2019 to 2021 not from 2019 to 2020.** The title specifies the range of the data series from 2019 to 2020, but when I try to draw the same picture, I found these six graphs wrongly included the data from 2019 to 2021. This can also help us to explain why we can find 2021 in the tick marks of x axis. To keep pace with the title, we need to re-filter the range of year to 2019-2020.
+**4.The data range of these six graphs are from 2019 to 2021 not from 2019 to 2020.** The title specifies the range of the data series from 2019 to 2020, but when I try to draw the same picture, I found these six graphs wrongly included the data from 2019 to 2021. This can also help us to explain why we can find 2021 in the tick marks of x axis. To keep pace with the title, we need to re-filter the range of year to 2019-2020.
 
 
 **5. The name of the x axis is not precise.** The name of x axis should not be “Month of Period” as the tick mark for x axis is year. Instead, we can rename it as “Year” or change the tick marks’ interval as months.
@@ -43,7 +43,7 @@ The above picture shows the original data visualization.
 
 **3. The size of each graph in the dashboard are not the same.** The graph of Mainland China and Malaysia look much bigger than other graphs and the graph of Japan seems like the smallest one. The graphs with different size in the dashboard are problematic and readers may perceive the subtle difference easily.
 
-**4. The dual-scaled axes chart is difficult to directly recognize the data and intuitively make right judgements about the graphs.** Although the two data series (Export and Import) with the same measures (million dollars), they have different magnitudes.
+**4. The dual-scaled axis chart is difficult to directly recognize the data and intuitively make right judgements about the graphs.** Although the two data series (Export and Import) with the same measures (million dollars), they have different magnitudes.
 
 **5. The borders of the graph are not obvious.** In all these six graphs, the Export and Import are overlapped with different colors. However, without the borders added, it cannot view clearly. So, we can add borders by clicking color in the Tableau. In the effects of the color tab, we can choose the border color.
 
@@ -74,7 +74,7 @@ The proposed design is shown above.
 
 ## 3.0 Proposed Visualization
 
-Please view the interactive visualisation on Tableau Public [here](https://public.tableau.com/app/profile/linli.zhong/viz/makeover1_16222975995010/Dashboard1)
+Please view the interactive visualisation on Tableau Public [here](https://public.tableau.com/app/profile/linli.zhong/viz/makeover1_16223006737670/Dashboard1)
 
 ## 4.0 Step-by-step Guide
 
