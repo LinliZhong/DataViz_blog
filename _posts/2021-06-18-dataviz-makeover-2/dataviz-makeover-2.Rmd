@@ -71,7 +71,7 @@ The proposed design is shown below.
 **4. Useful tooltip will be added for each graph.** In each graph, I will create some calculation field to calculate the difference, absolute difference, rank and so on. Besides, in the butterfly chart, I will use the created calculation to judge the partner is a net importer or net exporter. The result will be added in the tooltip.
 
 ## 4 Proposed Visualization
-Please view the interactive visualization on Tableau Public.
+Please view the interactive visualization on Tableau Public, click [here](https://public.tableau.com/app/profile/linli.zhong/viz/Makeover2_16240946903300/TradePerformance).
 
 <center>
 
