@@ -1,7 +1,8 @@
 name: "DataViz_blog"
-title: "Data Viz Makerover"
+title: "Linli's Blog"
+favicon: images/favicon.ico
 description: |
-  Data Viz Blog
+  Linli Zhong's Blog
 output_dir: "_site"
 navbar:
   right:
