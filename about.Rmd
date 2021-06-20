@@ -7,3 +7,8 @@ description: |
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 ```
+This is the personal blog of Linli Zhong, coming to you from Master of IT in Business, Singapore Management University
+
+Find me online:
+
+  - `r fontawesome::fa("github")` [`@Linli Zhong`](https://github.com/LinliZhong)
