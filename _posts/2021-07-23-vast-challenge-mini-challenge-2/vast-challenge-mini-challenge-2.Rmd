@@ -44,3 +44,13 @@ for(p in packages){
   }
   library(p,character.only = T)}
 ```
+
+### 2.2 Import relevant data
+The data is stored in MC2 file. Read_csv()is to import four csv files into R. "Windows-1252" is a single-byte character encoding of the Latin alphabet for value "Katerina’s Café".
+
+```{r}
+cc<- read_csv("MC2/cc_data.csv",locale = locale(encoding = "windows-1252"))
+lyt<-read_csv("MC2/loyalty_data.csv",locale = locale(encoding = "windows-1252"))
+gps <-read_csv("MC2/gps.csv")
+car<-read_csv("MC2/car-assignments.csv")
+```

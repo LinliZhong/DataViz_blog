@@ -3,17 +3,17 @@
     {
       "path": "about.html",
       "title": "About this blog",
-      "description": "This is the personal blog of Linli Zhong, coming to you from Master of IT in Business, Singapore Management University.",
+      "description": "Some additional details about the blog",
       "author": [],
-      "contents": "\r\nFind me online:\r\n@Linli Zhong\r\n\r\n\r\n\r\n",
-      "last_modified": "2021-06-20T17:15:30+08:00"
+      "contents": "\r\nThis is the personal blog of Linli Zhong, coming to you from Master of IT in Business, Singapore Management University\r\nFind me online:\r\n@Linli Zhong\r\n\r\n\r\n\r\n",
+      "last_modified": "2021-07-23T21:43:11+08:00"
     },
     {
       "path": "index.html",
       "title": "Data Viz Blog",
       "author": [],
       "contents": "\r\n\r\n\r\n\r\n",
-      "last_modified": "2021-06-20T17:15:42+08:00"
+      "last_modified": "2021-07-23T21:43:13+08:00"
     }
   ],
   "collections": ["posts/posts.json"]
