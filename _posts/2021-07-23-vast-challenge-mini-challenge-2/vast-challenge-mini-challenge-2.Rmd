@@ -90,3 +90,76 @@ cc$day<-get_day(cc$timestamp)
 lyt$day<-get_day(lyt$timestamp)
 gps$day<-get_day(gps$Timestamp)
 ```
+
+## 3. MC2 Visualization Preparation
+### 3.1 Question 1 
+
+**Using just the credit and loyalty card data, identify the most popular locations, and when they are popular. What anomalies do you see? What corrections would you recommend to correct these anomalies? Please limit your answer to 8 images and 300 words.**
+
+The code chunk below is to create bar chart to find out the popular location for both credit card and loyalty card.
+
+```{r}
+p1<-plot_ly(data = cc, x = ~location, marker = list(color = 'rgb(158,202,225)',
+                           line = list(color = 'rgb(8,48,107)', width = 1.5)))
+p1 <- p1 %>% layout(title = "Frequency of each location by credit card",
+                                      xaxis = list(title = "",
+                                                   tickfont = list(size = 10)),
+                                      yaxis = list(title = "count",
+                                                   tickfont = list(size = 10),
+                                                   range = c(0,220)))
+
+p2<-plot_ly(data = lyt, x = ~location, marker = list(color = 'rgb(158,202,225)',
+                           line = list(color = 'rgb(8,48,107)', width = 1.5)))
+p2 <- p2 %>% layout(title = "Frequency of each location by loyalty card",
+                                      xaxis = list(title = "",
+                                                   tickfont = list(size = 10)),
+                                      yaxis = list(title = "count",
+                                                   tickfont = list(size = 10),
+                                                   range = c(0,220)))
+p1
+p2
+```
+From the chart above, the y axis stands for the frequency of the employees went to the stores. There are 4 locations have more than 150 transactions by credit card from January 6th to 19th. We can mark these 4 locations as popular locations. These four popular locations are *Katerina’s Café, Hippokampos, Guy's Gyros, and Brew've Been Served*. On top of that Katerina’s Café is the most popular location where these 44 missing employees like. 212 and 195 transactions were made by credit card and loyalty card in Katerina’s Café within 14 days. In average, there were around 15 transactions made by credit card per day in Katerina’s Café.
+
+```{R}
+cc1<-cc%>%
+  filter(location == "Katerina’s Café"|
+         location == "Hippokampos"|
+         location == "Guy's Gyros"|
+         location == "Brew've Been Served")
+p2<-ggplot(data = cc1, aes(x=day, fill = location))+
+  geom_bar() + scale_fill_brewer(palette="Accent")+
+  ggtitle("Popular location by day")
+ggplotly(p2)
+```
+
+
+```{r}
+location_by_day <- cc1 %>%
+        ggplot(aes(x = day, fill = location)) +
+        geom_bar() +
+        labs(title = "popular locations' transaction by day",
+             x = "", y = "") +
+        facet_wrap(~ location, ncol = 2, scales = "free_y")+
+  scale_fill_brewer(palette="Accent")
+location_by_day_plotly <- ggplotly(location_by_day) %>% 
+        layout(yaxis = list(title = list(text = "Frequence", standoff = 20L)))
+
+location_by_day_plotly<-location_by_day_plotly%>%
+  layout(title = "Transaction frequency per location per day",
+         xaxis = list(title = "",
+                      tickfont = list(size = 10)),
+                      yaxis = list(title = "count",
+                      tickfont = list(size = 10)))
+location_by_day_plotly
+```
+
+From the above bar chart, I conclude the insights below.
+
+1.	Brew've Been Served had three popular days from 6th January to 19th January. These three days are 8th, 10th, and 15th. Meanwhile, it had the same number of transactions (count 17 transactions) by tracing the missing employees’ credit card and loyalty card in these three days. However, on 11th and 12th January, this store didn’t have any transactions with missing employees.
+
+2.	Guy's Gyros had two popular days within 14 days on 9th and 13th of January with 15 transactions with missing employees. These two days are around three times of the day on 11th, 12th and 18th with 4, 5, and 6 transactions respectively.
+
+3.	Hippokampos also had two popular days on 6th and 16th of January but with different transactions in these two days. on January 6th it received 16 transactions and on January 16th it received one more transaction compared with January 6th. From January 16th to 19th, the overall transaction declined, reaching a 14-day low on the 19th.
+
+4.	Katerina’s Café, the most popular locations’ popular day was January 18th. It had 20 transactions in that day. But from 6th to 10th January, transaction volume in Katerina’s Café experienced substantially decrease to 11 transactions. Then jumped to 18 transactions and drop back to 11 transactions on January 12th. From 13th to 18th of January the number of transactions fluctuated steadily. On January 19th it plummeted to 9 transactions.
