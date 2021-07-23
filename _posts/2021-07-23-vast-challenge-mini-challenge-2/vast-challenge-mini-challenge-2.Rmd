@@ -322,3 +322,31 @@ tm_shape(bgmap) +
   tm_shape(gps_path_selected) +
   tm_lines()
 ```
+
+### 3.3 Question 3 
+
+**Can you infer the owners of each credit card and loyalty card? What is your evidence? Where are there uncertainties in your method? Where are there uncertainties in the data? Please limit your answer to 8 images and 500 words.**
+
+### 3.4 Question 4 
+
+**Given the data sources provided, identify potential informal or unofficial relationships among GASTech personnel. Provide evidence for these relationships. Please limit your response to 8 images and 500 words.**
+
+### 3.5 Question 5 
+
+**Do you see evidence of suspicious activity? Identify 1- 10 locations where you believe the suspicious activity is occurring, and why Please limit your response to 10 images and 500 words.**
+
+```{r}
+p4<-plot_ly(data = cc, x = ~day, y=~price, marker = list(color = 'rgb(158,202,225)',
+                           line = list(color = 'rgb(8,48,107)', width = 1.5)))
+p4 <- p4 %>% layout(title = "Total price per day by credit card",
+                                      xaxis = list(title = "Day"),
+                                      yaxis = list(title = "Total price"))
+
+p5<-plot_ly(data = lyt, x = ~day, y=~price, marker = list(color = 'rgb(158,202,225)',
+                           line = list(color = 'rgb(8,48,107)', width = 1.5)))
+p5<- p5 %>% layout(title = "Total price per day by loyalty card",
+                                      xaxis = list(title = "Day"),
+                                      yaxis = list(title = "Total price"))
+p4
+p5
+```
