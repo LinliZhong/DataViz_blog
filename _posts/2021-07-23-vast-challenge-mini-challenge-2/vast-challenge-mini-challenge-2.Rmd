@@ -54,3 +54,39 @@ lyt<-read_csv("MC2/loyalty_data.csv",locale = locale(encoding = "windows-1252"))
 gps <-read_csv("MC2/gps.csv")
 car<-read_csv("MC2/car-assignments.csv")
 ```
+
+### 2.3 Data preparation
+
+**1. Change data type.** The code chunk below is to convert id in gps from number to factor, last4ccnum in cc from number to character and timestamp in gps, loyalty, and credit card from character data type to Datetime format.
+
+```{R}
+gps$id<-as.factor(gps$id)
+car$CarID<-as.factor(car$CarID)
+cc$last4ccnum<-as.character(cc$last4ccnum)
+gps$Timestamp<-date_time_parse(gps$Timestamp,zone = "",format = "%m/%d/%Y %H:%M:%S")
+lyt$timestamp<-date_time_parse(lyt$timestamp,zone = "",format = "%m/%d/%Y")
+cc$timestamp<-date_time_parse(cc$timestamp,zone = "",format = "%m/%d/%Y %H:%M")
+```
+
+**2. Combine data.** The code chunk below is to combine first name and last name of employee together in the list of car.
+
+```{r}
+car$Name<-paste(car$FirstName,car$LastName)
+```
+
+**3. Add additional column.** When analyzing the car assignment csv file, we may notice that the GAStech does not assign specific company truck for each truck driver, but this is not a case for other employees with title which is not truck driver. Hence, we can divide missing employees into two types, one is general employees, another one is truck driver, to further investigate their suspicious activities. Besides, add additional column for car type, and there are two types of cars, one for company truck another one for company car.
+
+```{r}
+car$Category<-ifelse(car$CurrentEmploymentTitle == "Truck Driver", 
+                       "Truck Driver","General Staff")
+gps$car_type<-ifelse(gps$id %in% c('101','104','105','106','107'),'Company truck',
+                     'company car')
+```
+
+The code chunk below is to extract day of the timestamp and add it in column called "day" in each file.
+
+```{r}
+cc$day<-get_day(cc$timestamp)
+lyt$day<-get_day(lyt$timestamp)
+gps$day<-get_day(gps$Timestamp)
+```

@@ -1488,6 +1488,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <li><a href="#data-preparation">2. Data Preparation</a><ul>
 <li><a href="#install-and-load-packages">2.1 Install and load packages</a></li>
 <li><a href="#import-relevant-data">2.2 Import relevant data</a></li>
+<li><a href="#data-preparation-1">2.3 Data preparation</a></li>
 </ul></li>
 </ul>
 </nav>
@@ -1523,6 +1524,45 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <span class='va'>lyt</span><span class='op'>&lt;-</span><span class='fu'>read_csv</span><span class='op'>(</span><span class='st'>"MC2/loyalty_data.csv"</span>,locale <span class='op'>=</span> <span class='fu'>locale</span><span class='op'>(</span>encoding <span class='op'>=</span> <span class='st'>"windows-1252"</span><span class='op'>)</span><span class='op'>)</span>
 <span class='va'>gps</span> <span class='op'>&lt;-</span><span class='fu'>read_csv</span><span class='op'>(</span><span class='st'>"MC2/gps.csv"</span><span class='op'>)</span>
 <span class='va'>car</span><span class='op'>&lt;-</span><span class='fu'>read_csv</span><span class='op'>(</span><span class='st'>"MC2/car-assignments.csv"</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<h3 id="data-preparation-1">2.3 Data preparation</h3>
+<p><strong>1. Change data type.</strong> The code chunk below is to convert id in gps from number to factor, last4ccnum in cc from number to character and timestamp in gps, loyalty, and credit card from character data type to Datetime format.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>gps</span><span class='op'>$</span><span class='va'>id</span><span class='op'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/base/factor.html'>as.factor</a></span><span class='op'>(</span><span class='va'>gps</span><span class='op'>$</span><span class='va'>id</span><span class='op'>)</span>
+<span class='va'>car</span><span class='op'>$</span><span class='va'>CarID</span><span class='op'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/base/factor.html'>as.factor</a></span><span class='op'>(</span><span class='va'>car</span><span class='op'>$</span><span class='va'>CarID</span><span class='op'>)</span>
+<span class='va'>cc</span><span class='op'>$</span><span class='va'>last4ccnum</span><span class='op'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/base/character.html'>as.character</a></span><span class='op'>(</span><span class='va'>cc</span><span class='op'>$</span><span class='va'>last4ccnum</span><span class='op'>)</span>
+<span class='va'>gps</span><span class='op'>$</span><span class='va'>Timestamp</span><span class='op'>&lt;-</span><span class='fu'>date_time_parse</span><span class='op'>(</span><span class='va'>gps</span><span class='op'>$</span><span class='va'>Timestamp</span>,zone <span class='op'>=</span> <span class='st'>""</span>,format <span class='op'>=</span> <span class='st'>"%m/%d/%Y %H:%M:%S"</span><span class='op'>)</span>
+<span class='va'>lyt</span><span class='op'>$</span><span class='va'>timestamp</span><span class='op'>&lt;-</span><span class='fu'>date_time_parse</span><span class='op'>(</span><span class='va'>lyt</span><span class='op'>$</span><span class='va'>timestamp</span>,zone <span class='op'>=</span> <span class='st'>""</span>,format <span class='op'>=</span> <span class='st'>"%m/%d/%Y"</span><span class='op'>)</span>
+<span class='va'>cc</span><span class='op'>$</span><span class='va'>timestamp</span><span class='op'>&lt;-</span><span class='fu'>date_time_parse</span><span class='op'>(</span><span class='va'>cc</span><span class='op'>$</span><span class='va'>timestamp</span>,zone <span class='op'>=</span> <span class='st'>""</span>,format <span class='op'>=</span> <span class='st'>"%m/%d/%Y %H:%M"</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<p><strong>2. Combine data.</strong> The code chunk below is to combine first name and last name of employee together in the list of car.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>car</span><span class='op'>$</span><span class='va'>Name</span><span class='op'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/base/paste.html'>paste</a></span><span class='op'>(</span><span class='va'>car</span><span class='op'>$</span><span class='va'>FirstName</span>,<span class='va'>car</span><span class='op'>$</span><span class='va'>LastName</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<p><strong>3. Add additional column.</strong> When analyzing the car assignment csv file, we may notice that the GAStech does not assign specific company truck for each truck driver, but this is not a case for other employees with title which is not truck driver. Hence, we can divide missing employees into two types, one is general employees, another one is truck driver, to further investigate their suspicious activities. Besides, add additional column for car type, and there are two types of cars, one for company truck another one for company car.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>car</span><span class='op'>$</span><span class='va'>Category</span><span class='op'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/base/ifelse.html'>ifelse</a></span><span class='op'>(</span><span class='va'>car</span><span class='op'>$</span><span class='va'>CurrentEmploymentTitle</span> <span class='op'>==</span> <span class='st'>"Truck Driver"</span>, 
+                       <span class='st'>"Truck Driver"</span>,<span class='st'>"General Staff"</span><span class='op'>)</span>
+<span class='va'>gps</span><span class='op'>$</span><span class='va'>car_type</span><span class='op'>&lt;-</span><span class='fu'><a href='https://rdrr.io/r/base/ifelse.html'>ifelse</a></span><span class='op'>(</span><span class='va'>gps</span><span class='op'>$</span><span class='va'>id</span> <span class='op'>%in%</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>'101'</span>,<span class='st'>'104'</span>,<span class='st'>'105'</span>,<span class='st'>'106'</span>,<span class='st'>'107'</span><span class='op'>)</span>,<span class='st'>'Company truck'</span>,
+                     <span class='st'>'company car'</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<p>The code chunk below is to extract day of the timestamp and add it in column called “day” in each file.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>cc</span><span class='op'>$</span><span class='va'>day</span><span class='op'>&lt;-</span><span class='fu'>get_day</span><span class='op'>(</span><span class='va'>cc</span><span class='op'>$</span><span class='va'>timestamp</span><span class='op'>)</span>
+<span class='va'>lyt</span><span class='op'>$</span><span class='va'>day</span><span class='op'>&lt;-</span><span class='fu'>get_day</span><span class='op'>(</span><span class='va'>lyt</span><span class='op'>$</span><span class='va'>timestamp</span><span class='op'>)</span>
+<span class='va'>gps</span><span class='op'>$</span><span class='va'>day</span><span class='op'>&lt;-</span><span class='fu'>get_day</span><span class='op'>(</span><span class='va'>gps</span><span class='op'>$</span><span class='va'>Timestamp</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
