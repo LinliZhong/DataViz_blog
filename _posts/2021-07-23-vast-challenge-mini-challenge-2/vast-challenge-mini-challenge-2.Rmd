@@ -163,3 +163,57 @@ From the above bar chart, I conclude the insights below.
 3.	Hippokampos also had two popular days on 6th and 16th of January but with different transactions in these two days. on January 6th it received 16 transactions and on January 16th it received one more transaction compared with January 6th. From January 16th to 19th, the overall transaction declined, reaching a 14-day low on the 19th.
 
 4.	Katerina’s Café, the most popular locations’ popular day was January 18th. It had 20 transactions in that day. But from 6th to 10th January, transaction volume in Katerina’s Café experienced substantially decrease to 11 transactions. Then jumped to 18 transactions and drop back to 11 transactions on January 12th. From 13th to 18th of January the number of transactions fluctuated steadily. On January 19th it plummeted to 9 transactions.
+
+```{R}
+cc2<-cc
+# create breaks
+breaks <- hour(hm("00:00", "5:59", "11:59", "17:59", "23:59"))
+# labels for the breaks
+labels <- c("Night", "Morning", "Afternoon", "Evening")
+cc2$Time_of_day <- cut(x=hour(cc2$timestamp), breaks = breaks, labels = labels, include.lowest=TRUE)
+cc2$date_time<-paste(cc2$day,cc2$Time_of_day)
+
+p3<-ggplot(cc2, aes(date_time, location)) + 
+  geom_bin2d() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+p3<-p3+scale_x_discrete(limits = c("6 Night", "6 Morning", "6 Afternoon","6 Evening",
+                                   "7 Night", "7 Morning", "7 Afternoon","7 Evening",
+                                   "8 Night", "8 Morning", "8 Afternoon","8 Evening",
+                                   "9 Night", "9 Morning", "9 Afternoon","9 Evening",
+                                   "10 Night", "10 Morning", "10 Afternoon","10 Evening",
+                                   "11 Night", "11 Morning", "11 Afternoon","11 Evening",
+                                   "12 Night", "12 Morning", "12 Afternoon","12 Evening",
+                                   "13 Night", "13 Morning", "13 Afternoon","13 Evening",
+                                   "14 Night", "14 Morning", "14 Afternoon","14 Evening",
+                                   "15 Night", "15 Morning", "15 Afternoon","15 Evening",
+                                   "16 Night", "16 Morning", "16 Afternoon","16 Evening",
+                                   "17 Night", "17 Morning", "17 Afternoon","17 Evening",
+                                   "18 Night", "18 Morning", "18 Afternoon","18 Evening",
+                                   "19 Night", "19 Morning", "19 Afternoon","19 Evening"))
+p3 <- ggplotly(p3)
+p3 <- p3 %>% layout(autosize = F, width = 800, height = 500)
+p3<-p3%>% layout(title = "Time of day vs location",
+                                      xaxis = list(title = "",
+                                                   tickfont = list(size = 8)),
+                                      yaxis = list(title = "",
+                                                   tickfont = list(size = 8)))
+
+```
+
+```{r fig.height = 5, fig.width = 5}
+p3
+```
+
+**Anomalies:**
+
+1.	Data anomalies: as I draw graphs, I noticed there are 1490 rows in credit card, while 1392 rows in loyalty card. The credit card cannot match loyalty card totally. So I only use credit card data to draw the heatmap above.
+2.	Activity anomalies: 
+a. Kronos Mart: have suspicious transaction data on January 12th 13th 19th night.
+b. Jack’s Magical Beans: usually employees have daily morning transactions in this store, but no transactions on 11th, 12th, 18th, and 19th.
+c. Daily Dealz: only has transactions on 13th night.
+d. Carlyle Chemical Inc., Brewed Awakenings, Brew’ve Been Served, Bean There Done That didn’t have any transaction data on January 12th, 13th, 18th, and 19th.
+
+### 3.2 Question 2 
+
+**Add the vehicle data to your analysis of the credit and loyalty card data. How does your assessment of the anomalies in question 1 change based on this new data? What discrepancies between vehicle, credit, and loyalty card data do you find? Please limit your answer to 8 images and 500 words.**
+
+The below code chunk is to visual the movement patter by company cars and company trucks, and they are faceted by employment type and truck car id respectively.
