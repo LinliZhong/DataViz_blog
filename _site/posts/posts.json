@@ -1,5 +1,22 @@
 [
   {
+    "path": "posts/2021-07-23-vast-challenge-mini-challenge-2/",
+    "title": "Vast Challenge Mini Challenge 2",
+    "description": "A short description of the post.",
+    "author": [
+      {
+        "name": "Linli Zhong",
+        "url": "https://github.com/LinliZhong"
+      }
+    ],
+    "date": "2021-07-23",
+    "categories": [],
+    "contents": "\r\n\r\nContents\r\n1. Overview1.1 Background\r\n1.2 Literature review\r\n\r\n2. Data Preparation2.1 Install and load packages\r\n\r\n\r\n1. Overview\r\n1.1 Background\r\nGAStech is a natural gas production company in an island country of Kronos in the past twenty years. It builds strong relationships with the government of Kronos but low environment stewardship. In January 2014, when celebrating the success fortune by IPO (initial public offering), several employees of GAStech went missing.\r\nThis post is focused on VAST Challenge 2021 Mini-Challenge 2. Mini-Challenge 2 provides useful data of missing employees’ relevant information, a list of vehicle assignments by employee, vehicle tracking data, loyalty card transaction data, credit and debit card transaction data, and a tourist map of Abila. In this post, I will make use of R language to visual and analyze available data and identify the suspicious activity of the employees.\r\n1.2 Literature review\r\n2. Data Preparation\r\n2.1 Install and load packages\r\nThe code chunk below is to check required packages are installed or not, if they are not installed, the code chunk will help install them automatically. After all packages are installed, the code chunk will load them.\r\n\r\n\r\npackages = c('igraph','ggraph','visNetwork','lubridate','dplyr',\r\n             'clock','tidyverse','DataExplorer','gplots','plotly',\r\n             'ggplot2','superheat','tm','plotly','lattice','GDAdata','raster',\r\n             'sf','tmap','foreign','gifski','rgdal','tiff'\r\n             )\r\nfor(p in packages){\r\n  if(!require(p, character.only = T)){\r\n  install.packages(p)\r\n  }\r\n  library(p,character.only = T)}\r\n\r\n\r\n\r\n\r\n\r\n\r\n",
+    "preview": {},
+    "last_modified": "2021-07-23T21:37:22+08:00",
+    "input_file": "vast-challenge-mini-challenge-2.knit.md"
+  },
+  {
     "path": "posts/2021-06-18-dataviz-makeover-2/",
     "title": "DataViz Makeover 2",
     "description": "This is the DataViz Makeover 2 for ISSS608.",
