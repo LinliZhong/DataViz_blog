@@ -337,7 +337,12 @@ Before infer the owners of the credit card an loyalty card, I need to compute th
 The code chunk below is to compute the stay time in one place (same latitude and longitude). Then filter out the data with time difference more than 9,000s (2.5h) to find out the longitude and latitude of company and their home. To make things easier, I round longitude and latitude with four digits in the newly created gps table.
 
 ```{r}
-gps4<- gps
+gps_track <- read_csv("MC2/gps.csv")
+gps_track$id<-as.factor(gps$id)
+gps_track$Timestamp<-date_time_parse(gps_track$Timestamp,zone = "",
+                                     format = "%m/%d/%Y %H:%M:%S")
+
+gps4<- gps_track
 gps4<- dplyr::rename(gps4, arrival_time = Timestamp)
 gps4$date<-as.Date(format(gps4$arrival_time, "%Y-%m-%d"))
 gps4$day_of_week<-wday(gps4$arrival_time, label=TRUE)
@@ -350,8 +355,7 @@ gps4 <- gps4 %>%
 gps4$arrival_time<-format(as.POSIXct(gps4$arrival_time), format = "%H:%M:%S")
 gps4$departure_time<-format(as.POSIXct(gps4$departure_time), format = "%H:%M:%S")
 
-#gps5<-gps4%>%
-#  dplyr::select(id,date,day_of_week,arrival_time,departure_time,lat,long,time_difference)
+
 gps5<-gps4%>%
   relocate(id,date,day_of_week,arrival_time,departure_time,lat,long,time_difference)
 DT::datatable(gps5)%>%
