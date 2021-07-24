@@ -11,6 +11,7 @@ output:
     toc: true
     toc_depth: 3
     self_contained: false
+fontsize: 12pt
 ---
 
 ```{r setup, include=FALSE}
@@ -36,7 +37,7 @@ The code chunk below is to check required packages are installed or not, if they
 packages = c('igraph','ggraph','visNetwork','lubridate','dplyr',
              'clock','tidyverse','DataExplorer','gplots','plotly',
              'ggplot2','superheat','tm','plotly','lattice','GDAdata','raster',
-             'sf','tmap','foreign','gifski','rgdal','tiff'
+             'sf','tmap','foreign','gifski','rgdal','tiff','sp','leaflet'
              )
 for(p in packages){
   if(!require(p, character.only = T)){
@@ -289,27 +290,35 @@ p6<-p6%>% layout(title = "Suspicious Night Activity Detected by Car ID",
 p6
 ```
 
+```{r}
+
+```
 
 ```{r}
 #Import raster file
 bgmap <- raster("MC2/Geospatial/MC2-tourist.tif")
-bgmap
+# import the Abila shapefile
+Abila_layout <- "MC2/Geospatial/Abila.shp"
+Abila_shape <- readOGR(Abila_layout)
 #Plot raster layer
 tm_shape(bgmap) +
 tm_rgb(bgmap, r = 1,g = 2,b = 3,alpha = NA,
-       saturation = 1,interpolate = TRUE, max.value = 255)
+       saturation = 1,interpolate = TRUE, max.value = 255)+
+  tm_shape(Abila_shape)+
+  tm_lines(col= "grey", lwd=1)
 #Import GIS data file
 Abila_st <- st_read(dsn = "MC2/Geospatial",
                     layer = "Abila")
 #Converting aspatial data into a simple feature data frame
 gps_sf <- st_as_sf(gps, coords = c("long", "lat"),crs= 4326)
-head(gps_sf)
 #Creating movement path from GPS points
 gps_path <- gps_sf %>%
   group_by(id, day) %>%
   summarize(m = mean(Timestamp), do_union=FALSE) %>%
   st_cast("LINESTRING")
-head(gps_path)
+```
+```{R}
+head(gps)
 ```
 
 ```{r}
