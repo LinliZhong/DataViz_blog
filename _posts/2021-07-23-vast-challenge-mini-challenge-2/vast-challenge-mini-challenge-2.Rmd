@@ -134,7 +134,6 @@ p2<-ggplot(data = cc1, aes(x=day, fill = location))+
 ggplotly(p2)
 ```
 
-
 ```{r}
 location_by_day <- cc1 %>%
         ggplot(aes(x = day, fill = location)) +
@@ -290,9 +289,7 @@ p6<-p6%>% layout(title = "Suspicious Night Activity Detected by Car ID",
 p6
 ```
 
-```{r}
-
-```
+From the graph shown above, we notice that there are 10 company cars had geospatial tracking data in the midnight (from 12am to 6am). There are 3 days, 7th, 11th, 14th, have more than one car driving path. 12th, 16th, and 19th have one car driving path. The result is a little bit different with analyzing credit and loyalty card data. Some car drivers may not buy anything when they go out, hence, only anlayzing expense records cannot notice these anomolies.
 
 ```{r}
 #Import raster file
@@ -335,6 +332,8 @@ tm_shape(bgmap) +
 ### 3.3 Question 3 
 
 **Can you infer the owners of each credit card and loyalty card? What is your evidence? Where are there uncertainties in your method? Where are there uncertainties in the data? Please limit your answer to 8 images and 500 words.**
+
+
 
 ### 3.4 Question 4 
 
