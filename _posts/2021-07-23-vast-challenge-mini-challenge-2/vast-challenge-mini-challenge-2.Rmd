@@ -1,7 +1,7 @@
 ---
-title: "Vast Challenge Mini Challenge 2"
+title: "Vast Challenge MC2"
 description: |
-  A short description of the post.
+  This blog is for the Vast Challenge 2021, Mini Challenge 2.
 author:
   - name: Linli Zhong
     url: https://github.com/LinliZhong
