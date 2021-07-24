@@ -170,7 +170,9 @@ cc2<-cc
 breaks <- hour(hm("00:00", "5:59", "11:59", "17:59", "23:59"))
 # labels for the breaks
 labels <- c("Night", "Morning", "Afternoon", "Evening")
-cc2$Time_of_day <- cut(x=hour(cc2$timestamp), breaks = breaks, labels = labels, include.lowest=TRUE)
+cc2$Time_of_day <- cut(x=hour(cc2$timestamp), 
+                       breaks = breaks, 
+                       labels = labels, include.lowest=TRUE)
 cc2$date_time<-paste(cc2$day,cc2$Time_of_day)
 
 p3<-ggplot(cc2, aes(date_time, location)) + 
@@ -289,7 +291,7 @@ p6<-p6%>% layout(title = "Suspicious Night Activity Detected by Car ID",
 p6
 ```
 
-From the graph shown above, we notice that there are 10 company cars had geospatial tracking data in the midnight (from 12am to 6am). There are 3 days, 7th, 11th, 14th, have more than one car driving path. 12th, 16th, and 19th have one car driving path. The result is a little bit different with analyzing credit and loyalty card data. Some car drivers may not buy anything when they go out, hence, only anlayzing expense records cannot notice these anomolies.
+From the graph shown above, we notice that there are 10 company cars had geospatial tracking data in the midnight (from 12am to 6am). There are 3 days, 7th, 11th, 14th, have more than one car driving path. 12th, 16th, and 19th have one car driving path. The result is a little bit different with analyzing credit and loyalty card data. Some car drivers may not buy anything when they go out, hence, only anlayzing expense records cannot notice these anomalies.
 
 ```{r}
 #Import raster file
