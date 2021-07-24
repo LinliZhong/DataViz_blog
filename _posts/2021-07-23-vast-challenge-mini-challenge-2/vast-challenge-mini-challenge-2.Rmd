@@ -353,18 +353,12 @@ gps4$departure_time<-format(as.POSIXct(gps4$departure_time), format = "%H:%M:%S"
 #gps5<-gps4%>%
 #  dplyr::select(id,date,day_of_week,arrival_time,departure_time,lat,long,time_difference)
 gps5<-gps4%>%
-  relocate(date,.after = id)%>%
-  relocate(day_of_week,.after = date)%>%
-  relocate(arrival_time, .after= day_of_week)%>%
-  relocate(departure_time, .after= arrival_time)%>%
-  relocate(lat, .after= departure_time)%>%
-  relocate(long, .after= lat)%>%
-  relocate(time_difference, .after= long)
-DT::datatable(gps4)%>%
+  relocate(id,date,day_of_week,arrival_time,departure_time,lat,long,time_difference)
+DT::datatable(gps5)%>%
     formatRound(columns=c('long', 'lat'), digits=4)
 ```
 
-We can assume from the above table that latitude with 36.0480 and longitude with 24.8796 is the company's location.
+We can assume from the above table that (24.8796,36.0480) is the company's location in the map, because on weekdays, employees usually park their cars at this location in the morning and in the lunchtime, they drive to another place then back to this place again. Besides, we can also assume that the working hours is from 
 
 
 ### 3.4 Question 4 
