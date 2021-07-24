@@ -37,7 +37,7 @@ The code chunk below is to check required packages are installed or not, if they
 packages = c('igraph','ggraph','visNetwork','lubridate','dplyr',
              'clock','tidyverse','DataExplorer','gplots','plotly',
              'ggplot2','superheat','tm','plotly','lattice','GDAdata','raster',
-             'sf','tmap','foreign','gifski','rgdal','tiff','sp','leaflet'
+             'sf','tmap','foreign','gifski','rgdal','tiff','sp','leaflet',"DT"
              )
 for(p in packages){
   if(!require(p, character.only = T)){
@@ -335,6 +335,23 @@ tm_shape(bgmap) +
 
 **Can you infer the owners of each credit card and loyalty card? What is your evidence? Where are there uncertainties in your method? Where are there uncertainties in the data? Please limit your answer to 8 images and 500 words.**
 
+Before infer the owners of the credit card an loyalty card, I need to compute the gps data to match the location name in credit and loyalty card with longtitude and latitude and locate its location in map.
+
+The code chunk below is to compute the stay time in one place (same latitude and longitude). Then filter out the data with time difference more than 9,000s (2.5h) to find out the longitude and latitude of company and their home. To make things easier, I round longitude and latitude with four digits in the newly created gps table.
+
+```{r}
+gps4<- gps
+gps4<- rename(gps4, arrival_time = Timestamp)
+gps4 <- gps4[order(gps4$id,gps4$arrival_time), ]
+gps4 <- gps4 %>%
+  group_by(id) %>%
+  mutate(departure_time = lead(arrival_time))%>%
+  mutate(time_difference = departure_time - arrival_time)%>%
+  filter(time_difference >= 10000)
+
+DT::datatable(gps4) %>%
+    formatRound(columns=c('long', 'lat'), digits=4)
+```
 
 
 ### 3.4 Question 4 
@@ -360,3 +377,13 @@ p5<- p5 %>% layout(title = "Total price per day by loyalty card",
 p4
 p5
 ```
+
+```{r}
+p6<-ggplot(cc, aes(x=location, y=price)) + 
+    geom_boxplot(color = "deepskyblue4")+
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+    labs(title = "Single Transaction Price per Location",
+             x = "Location", y = "Price")
+ggplotly(p6)
+```
+
