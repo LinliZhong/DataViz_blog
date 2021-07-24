@@ -316,9 +316,6 @@ gps_path <- gps_sf %>%
   summarize(m = mean(Timestamp), do_union=FALSE) %>%
   st_cast("LINESTRING")
 ```
-```{R}
-head(gps)
-```
 
 ```{r}
 gps_path_selected <- gps_path %>%
@@ -341,17 +338,33 @@ The code chunk below is to compute the stay time in one place (same latitude and
 
 ```{r}
 gps4<- gps
-gps4<- rename(gps4, arrival_time = Timestamp)
-gps4 <- gps4[order(gps4$id,gps4$arrival_time), ]
+gps4<- dplyr::rename(gps4, arrival_time = Timestamp)
+gps4$date<-as.Date(format(gps4$arrival_time, "%Y-%m-%d"))
+gps4$day_of_week<-wday(gps4$arrival_time, label=TRUE)
+gps4 <- gps4[order(gps4$id,gps4$date,gps4$arrival_time), ]
 gps4 <- gps4 %>%
   group_by(id) %>%
   mutate(departure_time = lead(arrival_time))%>%
   mutate(time_difference = departure_time - arrival_time)%>%
-  filter(time_difference >= 10000)
+  filter(time_difference >= 9000)
+gps4$arrival_time<-format(as.POSIXct(gps4$arrival_time), format = "%H:%M:%S")
+gps4$departure_time<-format(as.POSIXct(gps4$departure_time), format = "%H:%M:%S")
 
-DT::datatable(gps4) %>%
+#gps5<-gps4%>%
+#  dplyr::select(id,date,day_of_week,arrival_time,departure_time,lat,long,time_difference)
+gps5<-gps4%>%
+  relocate(date,.after = id)%>%
+  relocate(day_of_week,.after = date)%>%
+  relocate(arrival_time, .after= day_of_week)%>%
+  relocate(departure_time, .after= arrival_time)%>%
+  relocate(lat, .after= departure_time)%>%
+  relocate(long, .after= lat)%>%
+  relocate(time_difference, .after= long)
+DT::datatable(gps4)%>%
     formatRound(columns=c('long', 'lat'), digits=4)
 ```
+
+We can assume from the above table that latitude with 36.0480 and longitude with 24.8796 is the company's location.
 
 
 ### 3.4 Question 4 
