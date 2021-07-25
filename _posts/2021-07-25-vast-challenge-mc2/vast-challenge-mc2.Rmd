@@ -119,14 +119,121 @@ cc_lyt<-cc_lyt%>%
 DT::datatable(cc_lyt)
 ```
 
+```{r}
+#Import raster file
+bgmap <- raster("MC2/Geospatial/MC2-tourist.tif")
+# import the Abila shapefile
+Abila_layout <- "MC2/Geospatial/Abila.shp"
+Abila_shape <- readOGR(Abila_layout)
+#Plot raster layer
+tm_shape(bgmap) +
+tm_rgb(bgmap, r = 1,g = 2,b = 3,alpha = NA,
+       saturation = 1,interpolate = TRUE, max.value = 255)+
+  tm_shape(Abila_shape)+
+  tm_lines(col= "grey", lwd=1)
+#Import GIS data file
+Abila_st <- st_read(dsn = "MC2/Geospatial",
+                    layer = "Abila")
+#Converting aspatial data into a simple feature data frame
+gps_sf <- st_as_sf(gps, coords = c("long", "lat"),crs= 4326)
+#Creating movement path from GPS points
+gps_path <- gps_sf %>%
+  group_by(id, day) %>%
+  summarize(m = mean(Timestamp), do_union=FALSE) %>%
+  st_cast("LINESTRING")
+```
+
+### 3.3 Question 3 
+
+**Can you infer the owners of each credit card and loyalty card? What is your evidence? Where are there uncertainties in your method? Where are there uncertainties in the data? Please limit your answer to 8 images and 500 words.**
+
+Before infer the owners of the credit card an loyalty card, I need to compute the gps data to match the location name in credit and loyalty card with longtitude and latitude and locate its location in map.
+
+The code chunk below is to compute the stay time in one place (same latitude and longitude). Then filter out the data with time difference more than 9,000s (2.5h) to find out the longitude and latitude of company and their home. To make things easier, I round longitude and latitude with four digits in the newly created gps table.
+
+```{r}
+gps_track <- read_csv("MC2/gps.csv")
+gps_track$id<-as.factor(gps$id)
+gps_track$Timestamp<-date_time_parse(gps_track$Timestamp,zone = "",
+                                     format = "%m/%d/%Y %H:%M:%S")
+
+gps4<- gps_track
+gps4<- dplyr::rename(gps4, arrival_time = Timestamp)
+gps4$date<-as.Date(format(gps4$arrival_time, "%Y-%m-%d"))
+gps4$day_of_week<-wday(gps4$arrival_time, label=TRUE)
+gps4 <- gps4[order(gps4$id,gps4$date,gps4$arrival_time), ]
+gps4 <- gps4 %>%
+  group_by(id) %>%
+  mutate(departure_time = lead(arrival_time))%>%
+  mutate(time_difference = departure_time - arrival_time)%>%
+  filter(time_difference >= 18000)
+gps4$arrival_time<-format(as.POSIXct(gps4$arrival_time), format = "%H:%M:%S")
+gps4$departure_time<-format(as.POSIXct(gps4$departure_time), format = "%H:%M:%S")
+
+gps5<-gps4%>%
+  relocate(id,date,day_of_week,arrival_time,departure_time,lat,long,time_difference)
+
+DT::datatable(gps5)%>%
+    formatRound(columns=c('long', 'lat'), digits=4)
+```
+
+```{r}
+gps_sf <- st_as_sf(gps5, coords = c("long", "lat"),crs= 4326)
+#Creating movement path from GPS points
+gps_path <- gps_sf %>%
+  group_by(id, date,day_of_week,time_difference,arrival_time,departure_time)
+gps_path_selected <- gps_path# %>%
+  #filter(date == "2014-01-07")
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1,g = 2,b = 3,alpha = NA,saturation = 1,
+       interpolate = TRUE,max.value = 255) +
+  tm_shape(Abila_shape)+
+  tm_lines(col= "grey", lwd=1)+
+  tm_shape(gps_path_selected)+
+  tm_dots()
+```
+
+We can assume from the above table that (24.8796,36.0480) is the company's location in the map, because on weekdays, employees usually park their cars at this location in the morning and in the lunchtime, they drive to another place then back to this place again. Besides, after careful observation from the data table, I find employees arrive company before 9am and leave company around 12 o'clock in the morning, they eat lunch outside then go back to the office before 2pm and go back home or go shopping somewhere after 5.30pm. So we can filter the data on special time (working hours, midnight) from credit card and gps to infer the owner of the credit card and loyalty card.
+
+The below code chunk is to filter out the midnight transaction data and gps data. I order the newly created credit card table by its timstamp, so that I can find there are 5 transactions are made by midnight. 
+
+```{r}
+cc3<- cc 
+cc3$date<-as.Date(format(cc3$timestamp, "%Y-%m-%d"))
+cc3$timestamp<-format(as.POSIXct(cc3$timestamp), format = "%H:%M:%S")
+cc3<-cc3%>%
+  relocate(date,day,timestamp,price,location,last4ccnum)
+cc3 <- cc3[order(cc3$timestamp,cc3$date), ]
+cc3<- cc3%>%
+  filter(timestamp>="09:00:00"&timestamp<="12:00:00")
+  
+DT::datatable(cc3)
+```
+
+![](image/3.jpg){width=110%} 
+Becasue the format of timestamp in credit card dataset and loyalty card dataset is different, I try to change the format of credit card table with "%Y-%m-%d". Then I join these two tables and add a new row to check whether the employees use loyalty card or not.
+
+```{r}
+cc4<-cc
+cc4$timestamp<-format(cc$timestamp,format="%Y-%m-%d")
+lyt4<-lyt
+lyt4$timestamp<-format(lyt4$timestamp,format="%Y-%m-%d")
+cc_lyt<-merge(x=cc4,y=lyt4,all.x = TRUE)
+x <-if_else(is.na(cc_lyt$loyaltynum),"No","Yes")
+cc_lyt$use_loyalty<-x
+
+suspicious_cc<- c("9551", "8332", "3484","5407","8156")
+sus_day <- c(12,13,19)
+cc_lyt<-cc_lyt%>%
+  filter(day %in% sus_day, last4ccnum %in% suspicious_cc, 
+         location == "Kronos Mart")
+DT::datatable(cc_lyt)
+```
 
 ### 3.4 Question 4 
 
 **Given the data sources provided, identify potential informal or unofficial relationships among GASTech personnel. Provide evidence for these relationships. Please limit your response to 8 images and 500 words.**
-
-```{r}
-
-```
 
 ```{r}
 gps5<- gps_track
