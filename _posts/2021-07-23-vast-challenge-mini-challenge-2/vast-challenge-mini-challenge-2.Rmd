@@ -366,9 +366,9 @@ cc_lyt<-merge(x=cc4,y=lyt4,all.x = TRUE)
 x <-if_else(is.na(cc_lyt$loyaltynum),"No","Yes")
 cc_lyt$use_loyalty<-x
 
-suspicous_cc<- c("9551", "8332", "3484")
-cc_lyt<-cc_lyt%>%
-  filter(day == 19 & last4ccnum %in% suspicous_cc)
+#suspicious_cc<- c("9551", "8332", "3484")
+#cc_lyt<-cc_lyt%>%
+#  filter(day == 19 & last4ccnum %in% suspicious_cc)
 DT::datatable(cc_lyt)
 ```
 
@@ -435,12 +435,12 @@ ggplotly(p6)
 **Using just the credit and loyalty card data, identify the most popular locations, and when they are popular. What anomalies do you see? What corrections would you recommend to correct these anomalies? Please limit your answer to 8 images and 300 words.**
 
 ![](image/4.jpg){width=110%} 
+*Fig1.1 Detect Popular Locations*
 
-Fig1.1 Popular locations are detected based on the number of transaction records in credit card. There are 4 locations have more than 150 transactions by credit card from January 6th to 19th. We can mark these 4 locations as popular locations. These four popular locations are *Katerina’s Café, Hippokampos, Guy's Gyros, and Brew've Been Served*. On top of that Katerina’s Café is the most popular location where these 44 missing employees like. 212 and 195 transactions were made by credit card and loyalty card in Katerina’s Café within 14 days. In average, there were around 15 transactions made by credit card per day in Katerina’s Café.
+Popular locations are detected based on the number of transaction records in credit card. There are 4 locations have more than 150 transactions by credit card from January 6th to 19th. We can mark these 4 locations as popular locations. These four popular locations are *Katerina’s Café, Hippokampos, Guy's Gyros, and Brew've Been Served*. On top of that Katerina’s Café is the most popular location where these 44 missing employees like. 212 and 195 transactions were made by credit card and loyalty card in Katerina’s Café within 14 days. In average, there were around 15 transactions made by credit card per day in Katerina’s Café.
 
 ![](image/5.jpg){width=110%} 
-
-Fig1.2 Comparision of these four popular locations per day. 
+*Fig1.2 Comparison of Four Popular Locations per Day*
 
 **Brew've Been Served** had three popular days from 6th January to 19th January. These three days are 8th, 10th, and 15th. Meanwhile, it had the same number of transactions (count 17 transactions) by tracing the missing employees’ credit card and loyalty card in these three days. However, on 11th and 12th January, this store didn’t have any transactions with missing employees.
 
@@ -451,31 +451,39 @@ Fig1.2 Comparision of these four popular locations per day.
 **Katerina’s Café** the most popular locations’ popular day was January 18th. It had 20 transactions in that day. But from 6th to 10th January, transaction volume in Katerina’s Café experienced substantially decrease to 11 transactions. Then jumped to 18 transactions and drop back to 11 transactions on January 12th. From 13th to 18th of January the number of transactions fluctuated steadily. On January 19th it plummeted to 9 transactions.
 
 ![](image/6.jpg){width=110%} 
+*Fig1.3 Transaction Records in Credit Card by Time of the Day*
 
-Fig1.3 Anomaly 1. At midnight (00.00 to 05.59) there are 5 transactions recored in Kronos Mart. All the transactions at midnight are in this store. I suggest investigating this mart, such as who they made these transactions, when they arrived and depatured at this place.
+Anomaly 1. At midnight (00.00 to 05.59) there are 5 transactions recored in Kronos Mart. All the transactions at midnight are in this store. I suggest investigating this mart, such as who they made these transactions, when they arrived and depatured at this place.
 
 ![](image/7.jpg){width=110%}
+*Fig1.4 Transaction Records in Credit Card by Time of the Day*
 
-Fig1.4 Anomaly 2. In the 14 dyas record of credit card, there are 2 transactions made in Frank’s Fuel and U-Pump, and 1 transactions made in Daily Dealz. In general, people are more inclined to spend in stores they are familiar with. I suggest police should investigate the motivation of employees to go to these three place and what they bought. Besides, for Frank’s Fuel and U-Pump, we should investigate whether these two transactions were made by one employee.
+Anomaly 2. In the 14 dyas record of credit card, there are 2 transactions made in Frank’s Fuel and U-Pump, and 1 transactions made in Daily Dealz. In general, people are more inclined to spend in stores they are familiar with. I suggest police should investigate the motivation of employees to go to these three place and what they bought. Besides, for Frank’s Fuel and U-Pump, we should investigate whether these two transactions were made by one employee.
 
 ### 4.2 Question 2 
 
 **Add the vehicle data to your analysis of the credit and loyalty card data. How does your assessment of the anomalies in question 1 change based on this new data? What discrepancies between vehicle, credit, and loyalty card data do you find? Please limit your answer to 8 images and 500 words.**
 
 ![](image/2.jpg){width=110%} 
-Fig2.1 Anomalies.
+*Fig2.1 Movement Patterns by Employment Type and Car ID*
 
 Anomaly 1. Weekday anomalies. The working days are from Monday to Friday, alternatively speaking, January 6th to 10th and 13th to 17th. Almost all the cars and trucks showed similar driving path on weekdays. But the driving path for executives on 15th, facilities on 17th, 107 on 7th is different than usual.
 
 Anomaly 2. Weekend anomalies. The weekend is January 11th, 12th, 18th and 19th. As company trucks were not used in these days, we only investigate the anomolies in company cars. Dislike weekdays, employees can drive cars to anywhere they want and from the graph, it doesn’t show similar patterns on these four days. But one thing is weird that on 19th January, Bertrand Ovan, staff who is the only missing facilities employees not belongs to truck drivers, didn’t go anywhere. Besides, information technology and security employees showed less frequent driving pattern on January 19th.
 
 ![](image/8.jpg){width=110%} 
+*Fig2.2 Suspicious Night Activity Detected by Car ID*
 
-Fig2.2 Discrepancies between vehicle, credit and loyalty card data. I notice that there are 10 company cars had geospatial tracking data in the midnight (from 12am to 6am). There are 3 days, 7th, 11th, 14th, have more than one car driving path. 12th, 16th, and 19th have one car driving path. The result is a little bit different with analyzing credit and loyalty card data. Some car drivers may not buy anything when they go out, hence, only anlayzing expense records cannot notice these anomalies.
+Discrepancies between vehicle, credit and loyalty card data. I notice that there are 10 company cars had geospatial tracking data in the midnight (from 12am to 6am). There are 3 days, 7th, 11th, 14th, have more than one car driving path. 12th, 16th, and 19th have one car driving path. The result is a little bit different with analyzing credit and loyalty card data. Some car drivers may not buy anything when they go out, hence, only anlayzing expense records cannot notice these anomalies.
 
 ### 4.3 Question 3 
 
 **Can you infer the owners of each credit card and loyalty card? What is your evidence? Where are there uncertainties in your method? Where are there uncertainties in the data? Please limit your answer to 8 images and 500 words.**
+
+```{r}
+DT::datatable(cc_lyt)
+```
+
 
 ### 4.4 Question 4
 
@@ -484,3 +492,10 @@ Fig2.2 Discrepancies between vehicle, credit and loyalty card data. I notice tha
 ### 4.5 Question 5
 
 **Do you see evidence of suspicious activity? Identify 1- 10 locations where you believe the suspicious activity is occurring, and why Please limit your response to 10 images and 500 words.**
+
+![](image/9.jpg){width=110%} 
+
+*Fig5.1 Suspicious Night Transactions by Credit Card*
+
+Suspicious activity 1. I filter out the transaction records made at midnight. There are five transactions on 12th, 13th, and 19th. What I am curious about is all the credit card transactions at midnight are in the Kronos Mart. Does this store have special merchandise for sale? Or are these missing employees and suspects meeting at this place at midnight? 
+
