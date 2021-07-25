@@ -338,6 +338,23 @@ DT::datatable(gps5)%>%
     formatRound(columns=c('long', 'lat'), digits=4)
 ```
 
+```{r}
+gps_sf <- st_as_sf(gps5, coords = c("long", "lat"),crs= 4326)
+#Creating movement path from GPS points
+gps_path <- gps_sf %>%
+  group_by(id, date,day_of_week,time_difference,arrival_time,departure_time)
+gps_path_selected <- gps_path# %>%
+  #filter(date == "2014-01-07")
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1,g = 2,b = 3,alpha = NA,saturation = 1,
+       interpolate = TRUE,max.value = 255) +
+  tm_shape(Abila_shape)+
+  tm_lines(col= "grey", lwd=1)+
+  tm_shape(gps_path_selected)+
+  tm_dots()
+```
+
 We can assume from the above table that (24.8796,36.0480) is the company's location in the map, because on weekdays, employees usually park their cars at this location in the morning and in the lunchtime, they drive to another place then back to this place again. Besides, after careful observation from the data table, I find employees arrive company before 9am and leave company around 12 o'clock in the morning, they eat lunch outside then go back to the office before 2pm and go back home or go shopping somewhere after 5.30pm. So we can filter the data on special time (working hours, midnight) from credit card and gps to infer the owner of the credit card and loyalty card.
 
 The below code chunk is to filter out the midnight transaction data and gps data. I order the newly created credit card table by its timstamp, so that I can find there are 5 transactions are made by midnight. 
