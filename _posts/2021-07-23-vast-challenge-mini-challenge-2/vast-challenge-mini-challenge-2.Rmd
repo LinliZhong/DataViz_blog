@@ -326,8 +326,8 @@ gps4 <- gps4[order(gps4$id,gps4$date,gps4$arrival_time), ]
 gps4 <- gps4 %>%
   group_by(id) %>%
   mutate(departure_time = lead(arrival_time))%>%
-  mutate(time_difference = departure_time - arrival_time)%>%
-  filter(time_difference >= 18000)
+  mutate(time_difference = departure_time - arrival_time)#%>%
+#  filter(time_difference >= 18000)
 gps4$arrival_time<-format(as.POSIXct(gps4$arrival_time), format = "%H:%M:%S")
 gps4$departure_time<-format(as.POSIXct(gps4$departure_time), format = "%H:%M:%S")
 
@@ -398,6 +398,16 @@ DT::datatable(cc_lyt)
 ### 3.4 Question 4 
 
 **Given the data sources provided, identify potential informal or unofficial relationships among GASTech personnel. Provide evidence for these relationships. Please limit your response to 8 images and 500 words.**
+
+```{r}
+gps6<-gps5%>%
+  filter(id != "107"& id != "106"&id != "105"&
+         id != "104"&id != "101")
+gps6<-merge(x = gps6, y = car[ , c("Name", "CarID")], 
+            by.x='id', by.y='CarID')
+
+
+```
 
 ### 3.5 Question 5 
 
@@ -556,4 +566,4 @@ Fig 5.5 shows the locations where customers stayed more than 5 hours in a day. F
 
 *Fig 5.7 Suspicious Location*
 
-Suspicious activity 4. The above graph shows 7 suspicious places where employees stays more than 5 hours. Were they meet any others during the stay?
+Suspicious activity 4. The above graph shows 7 suspicious places where employees stays more than 5 hours. Did they meet any others during the stay?
