@@ -423,8 +423,8 @@ gps_sf <- st_as_sf(gps6, coords = c("long", "lat"),crs= 4326)
 #Creating movement path from GPS points
 gps_path <- gps_sf %>%
   group_by(Name, id, date,day_of_week,time_difference,arrival_time,departure_time)
-gps_path_selected2 <- gps_path %>%
-  filter(date == "2014-01-11")
+gps_path_selected2 <- gps_path #%>%
+  #filter(date == "2014-01-11")
 tmap_mode("view")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1,g = 2,b = 3,alpha = NA,saturation = 1,
@@ -432,7 +432,8 @@ tm_shape(bgmap) +
   tm_shape(Abila_shape)+
   tm_lines(col= "grey", lwd=1)+
   tm_shape(gps_path_selected2)+
-  tm_dots()
+  tm_dots()+
+  tm_facets(by = "date")
 ```
 
 ### 3.5 Question 5 
