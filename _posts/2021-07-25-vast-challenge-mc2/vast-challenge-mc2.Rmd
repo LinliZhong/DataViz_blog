@@ -97,3 +97,107 @@ cc$day<-get_day(cc$timestamp)
 lyt$day<-get_day(lyt$timestamp)
 gps$day<-get_day(gps$Timestamp)
 ```
+
+## 3. MC2 Visualization Preparation
+### 3.1 Question 1 
+
+The code chunk below is to create bar chart to find out the popular location for both credit card and loyalty card.
+
+```{r}
+p1<-plot_ly(data = cc, x = ~location, marker = list(color = 'rgb(158,202,225)',
+                           line = list(color = 'rgb(8,48,107)', width = 1.5)))
+p1 <- p1 %>% layout(title = "Frequency of each location by credit card",
+                                      xaxis = list(title = "",
+                                                   tickfont = list(size = 10)),
+                                      yaxis = list(title = "count",
+                                                   tickfont = list(size = 10),
+                                                   range = c(0,220)))
+
+p2<-plot_ly(data = lyt, x = ~location, marker = list(color = 'rgb(158,202,225)',
+                           line = list(color = 'rgb(8,48,107)', width = 1.5)))
+p2 <- p2 %>% layout(title = "Frequency of each location by loyalty card",
+                                      xaxis = list(title = "",
+                                                   tickfont = list(size = 10)),
+                                      yaxis = list(title = "count",
+                                                   tickfont = list(size = 10),
+                                                   range = c(0,220)))
+p1
+p2
+```
+
+From the graph generated above, I filter 4 locations, these are Katerina’s Café, Hippokampos, Guy's Gyros, Brew've Been Served to compare with each other and find out when are they popular.
+
+```{R}
+cc1<-cc%>%
+  filter(location == "Katerina’s Café"|
+         location == "Hippokampos"|
+         location == "Guy's Gyros"|
+         location == "Brew've Been Served")
+p2<-ggplot(data = cc1, aes(x=day, fill = location))+
+  geom_bar() + scale_fill_brewer(palette="Accent")+
+  ggtitle("Popular location by day")
+ggplotly(p2)
+```
+
+```{r}
+location_by_day <- cc1 %>%
+        ggplot(aes(x = day, fill = location)) +
+        geom_bar() +
+        labs(title = "popular locations' transaction by day",
+             x = "", y = "") +
+        facet_wrap(~ location, ncol = 2, scales = "free_y")+
+  scale_fill_brewer(palette="Accent")
+location_by_day_plotly <- ggplotly(location_by_day) %>% 
+        layout(yaxis = list(title = list(text = "Frequence", standoff = 20L)))
+
+location_by_day_plotly<-location_by_day_plotly%>%
+  layout(title = "Transaction frequency per location per day",
+         xaxis = list(title = "",
+                      tickfont = list(size = 10)),
+                      yaxis = list(title = "count",
+                      tickfont = list(size = 10)))
+location_by_day_plotly
+```
+
+Below code chunk is to find out anomalies from credit card. I would like to investigate suspicious transaction time and less popular locations.
+
+```{R}
+cc2<-cc
+# create breaks
+breaks <- hour(hm("00:00", "5:59", "11:59", "17:59", "23:59"))
+# labels for the breaks
+labels <- c("Night", "Morning", "Afternoon", "Evening")
+cc2$Time_of_day <- cut(x=hour(cc2$timestamp), 
+                       breaks = breaks, 
+                       labels = labels, include.lowest=TRUE)
+cc2$date_time<-paste(cc2$day,cc2$Time_of_day)
+
+p3<-ggplot(cc2, aes(date_time, location)) + 
+  geom_bin2d() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+p3<-p3+scale_x_discrete(limits = c("6 Night", "6 Morning", "6 Afternoon","6 Evening",
+                                   "7 Night", "7 Morning", "7 Afternoon","7 Evening",
+                                   "8 Night", "8 Morning", "8 Afternoon","8 Evening",
+                                   "9 Night", "9 Morning", "9 Afternoon","9 Evening",
+                                   "10 Night", "10 Morning", "10 Afternoon","10 Evening",
+                                   "11 Night", "11 Morning", "11 Afternoon","11 Evening",
+                                   "12 Night", "12 Morning", "12 Afternoon","12 Evening",
+                                   "13 Night", "13 Morning", "13 Afternoon","13 Evening",
+                                   "14 Night", "14 Morning", "14 Afternoon","14 Evening",
+                                   "15 Night", "15 Morning", "15 Afternoon","15 Evening",
+                                   "16 Night", "16 Morning", "16 Afternoon","16 Evening",
+                                   "17 Night", "17 Morning", "17 Afternoon","17 Evening",
+                                   "18 Night", "18 Morning", "18 Afternoon","18 Evening",
+                                   "19 Night", "19 Morning", "19 Afternoon","19 Evening"))
+p3 <- ggplotly(p3)
+p3 <- p3 %>% layout(autosize = F, width = 800, height = 500)
+p3<-p3%>% layout(title = "Time of day vs location",
+                                      xaxis = list(title = "",
+                                                   tickfont = list(size = 8)),
+                                      yaxis = list(title = "",
+                                                   tickfont = list(size = 8)))
+
+```
+
+```{r fig.height = 5, fig.width = 5}
+p3
+```
