@@ -302,7 +302,7 @@ p6<-ggplot(cc, aes(x = reorder(location,price), y=price)) +
 ggplotly(p6)
 ```
 
-
+##4. MC2 Visualization Insights
 
 ### 4.3 Question 3 
 
