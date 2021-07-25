@@ -28,6 +28,12 @@ This post is focused on [VAST Challenge 2021 Mini-Challenge 2](https://vast-chal
 
 ### 1.2 Literature review
 
+The task of Mini Challenge 2 in 2014 was to find unusual patterns in employees’ daily lives from their credit/debit/loyalty card records and the GPS tracking records of their cars. In this article, I mainly refer to two works by Central South University and KU Leuven.
+
+For Central South University, they used D3, MySQL, Excel as their visualization tools. They first identified daily routines for GAStech employees. They divided these missing employees into general staffs and truck drivers. Then they discuessed these two groups separately. They detected suspicious activities by visualization the credit card and gps data.
+
+For KU Leuven, they had three stages to visualize. (1) Aggregate & Slice, (2) Design, Filter & Analyze and (3) Communicate. They first made full use of R to test their hypothesis. Then involved the design and implementation of streamlined tools to optimize the identification of specific patterns. After that, they presented and visualized the results.
+
 
 ## 2. Data Preparation
 ### 2.1 Install and load packages
@@ -291,17 +297,6 @@ gps_path <- gps_sf %>%
   group_by(id, day) %>%
   summarize(m = mean(Timestamp), do_union=FALSE) %>%
   st_cast("LINESTRING")
-```
-
-```{r}
-gps_path_selected <- gps_path %>%
-  filter(id==1)
-tmap_mode("view")
-tm_shape(bgmap) +
-  tm_rgb(bgmap, r = 1,g = 2,b = 3,alpha = NA,saturation = 1,
-       interpolate = TRUE,max.value = 255) +
-  tm_shape(gps_path_selected) +
-  tm_lines()
 ```
 
 ### 3.3 Question 3 
