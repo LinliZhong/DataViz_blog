@@ -362,8 +362,41 @@ DT::datatable(gps5)%>%
     formatRound(columns=c('long', 'lat'), digits=4)
 ```
 
-We can assume from the above table that (24.8796,36.0480) is the company's location in the map, because on weekdays, employees usually park their cars at this location in the morning and in the lunchtime, they drive to another place then back to this place again. Besides, we can also assume that the working hours is from 
+We can assume from the above table that (24.8796,36.0480) is the company's location in the map, because on weekdays, employees usually park their cars at this location in the morning and in the lunchtime, they drive to another place then back to this place again. Besides, after careful observation from the data table, I find employees arrive company before 9am and leave company around 12 o'clock in the morning, they eat lunch outside then go back to the office before 2pm and go back home or go shopping somewhere after 5.30pm. So we can filter the data on special time (working hours, midnight) from credit card and gps to infer the owner of the credit card and loyalty card.
 
+The below code chunk is to filter out the midnight transaction data and gps data. I order the newly created credit card table by its timstamp, so that I can find there are 5 transactions are made by midnight. 
+
+```{r}
+cc3<- cc 
+cc3$date<-as.Date(format(cc3$timestamp, "%Y-%m-%d"))
+cc3$timestamp<-format(as.POSIXct(cc3$timestamp), format = "%H:%M:%S")
+cc3<-cc3%>%
+  relocate(date,day,timestamp,price,location,last4ccnum)
+cc3 <- cc3[order(cc3$timestamp,cc3$date), ]
+
+  
+DT::datatable(cc3)
+```
+
+```{r}
+gps5<- gps_track
+gps5<- dplyr::rename(gps5, arrival_time = Timestamp)
+gps5$date<-as.Date(format(gps5$arrival_time, "%Y-%m-%d"))
+gps5$day_of_week<-wday(gps5$arrival_time, label=TRUE)
+gps5 <- gps5[order(gps5$id,gps5$date,gps5$arrival_time), ]
+gps5 <- gps5 %>%
+  group_by(id) %>%
+  mutate(departure_time = lead(arrival_time))%>%
+  mutate(time_difference = departure_time - arrival_time)%>%
+  filter(time_difference >= 180)
+date1 <- as.POSIXct("2014-01-19 00:00:00") #lower bound
+date2 <- as.POSIXct("2014-01-19 05:59:59") #upper bound
+rng <- interval(date1,date2)         #desired range
+gps5 <- gps5[gps5$arrival_time %within% rng,]
+gps5$arrival_time<-format(as.POSIXct(gps5$arrival_time), format = "%H:%M:%S")
+gps5$departure_time<-format(as.POSIXct(gps5$departure_time), format = "%H:%M:%S")
+DT::datatable(gps5)
+```
 
 ### 3.4 Question 4 
 
