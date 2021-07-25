@@ -298,3 +298,36 @@ gps_path <- gps_sf %>%
   summarize(m = mean(Timestamp), do_union=FALSE) %>%
   st_cast("LINESTRING")
 ```
+
+### 3.4 Question 4 
+
+**Given the data sources provided, identify potential informal or unofficial relationships among GASTech personnel. Provide evidence for these relationships. Please limit your response to 8 images and 500 words.**
+
+### 3.5 Question 5 
+
+**Do you see evidence of suspicious activity? Identify 1- 10 locations where you believe the suspicious activity is occurring, and why Please limit your response to 10 images and 500 words.**
+
+```{r}
+p4<-plot_ly(data = cc, x = ~day, y=~price, marker = list(color = 'rgb(158,202,225)',
+                           line = list(color = 'rgb(8,48,107)', width = 1.5)))
+p4 <- p4 %>% layout(title = "Total price per day by credit card",
+                                      xaxis = list(title = "Day"),
+                                      yaxis = list(title = "Total price"))
+
+p5<-plot_ly(data = lyt, x = ~day, y=~price, marker = list(color = 'rgb(158,202,225)',
+                           line = list(color = 'rgb(8,48,107)', width = 1.5)))
+p5<- p5 %>% layout(title = "Total price per day by loyalty card",
+                                      xaxis = list(title = "Day"),
+                                      yaxis = list(title = "Total price"))
+p4
+p5
+```
+
+```{r}
+p6<-ggplot(cc, aes(x = reorder(location,price), y=price)) + 
+    geom_boxplot(color = "deepskyblue4")+
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+    labs(title = "Single Transaction Price per Location",
+             x = "Location", y = "Price")
+ggplotly(p6)
+```
