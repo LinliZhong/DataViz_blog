@@ -366,9 +366,9 @@ cc_lyt<-merge(x=cc4,y=lyt4,all.x = TRUE)
 x <-if_else(is.na(cc_lyt$loyaltynum),"No","Yes")
 cc_lyt$use_loyalty<-x
 
-#suspicious_cc<- c("9551", "8332", "3484")
-#cc_lyt<-cc_lyt%>%
-#  filter(day == 19 & last4ccnum %in% suspicious_cc)
+suspicious_cc<- c("9551", "8332", "3484")
+cc_lyt<-cc_lyt%>%
+  filter(day == 19 & last4ccnum %in% suspicious_cc)
 DT::datatable(cc_lyt)
 ```
 
@@ -421,7 +421,7 @@ p5
 ```
 
 ```{r}
-p6<-ggplot(cc, aes(x=location, y=price)) + 
+p6<-ggplot(cc, aes(x = reorder(location,price), y=price)) + 
     geom_boxplot(color = "deepskyblue4")+
     theme(axis.text.x = element_text(angle = 90, hjust = 1))+
     labs(title = "Single Transaction Price per Location",
@@ -480,9 +480,26 @@ Discrepancies between vehicle, credit and loyalty card data. I notice that there
 
 **Can you infer the owners of each credit card and loyalty card? What is your evidence? Where are there uncertainties in your method? Where are there uncertainties in the data? Please limit your answer to 8 images and 500 words.**
 
+I infer the owners of each credit card and loyalty card by four steps.
+
 ```{r}
 DT::datatable(cc_lyt)
 ```
+*Fig3.1 Join Credit Card Table with Loyalty Card Table*
+
+Step 1: Join credit card and loyalty card table together. As credit card table and loyalty card table have similar variables, I left join loyalty card table with credit card table and add a new column called “use_loyalty” to check whether employees used loyalty card when they make transactions.
+
+![](image/10.jpg){width=70%} 
+
+*Fig3.2 Infer Home Address and Company Location*
+
+Step 2: Create a new table to calculate the time difference employees stayed in one place. I assume that employees would stay at home more than five hours in the night. So I filter out time difference more than 18,000s (5 hours) to detect each employee’s home address. For example, in Fig3.2, we can infer (24.8796,36.0065) is the home of the owner of company car 1. For the same method, I find (24.8796,36.0480) is the location of GAStech company. In later discuss, we can filter out these data to make things easier, because stay at home or in the company should not be suspicious in most of the time.
+
+![](image/11.jpg){width=90%} 
+
+*Fig3.3 Suspicious Night Credit Card Transaction*
+
+Step 3: Detect suspicious transaction time from credit card. Suspicious transaction time I mentioned here has two parts. Firstly, the transaction made at midnight. Employees may sleep during midnight. If someone’s car didn’t park near their home and have some transaction records in credit card, that will be highly suspicious. Secondly, as I view the data in gps, I assume the working hours in GAStech is from 9 o’clock to 12 o’clock in the morning, 2 o’clock to 5 o’clock in the afternoon. During this time period, if they didn’t at office, it will be marked as suspicious.
 
 
 ### 4.4 Question 4
