@@ -1,7 +1,7 @@
 ---
-title: "Assignment Vast Challenge MC2"
+title: "Vast Challenge MC2 (I)"
 description: |
-  This blog is for the Vast Challenge 2021, Mini Challenge 2.
+  This blog is for the Vast Challenge 2021, Mini Challenge 2 Q1 and Q2.
 author:
   - name: Linli Zhong
     url: https://github.com/LinliZhong
@@ -19,6 +19,8 @@ knitr::opts_chunk$set(fig.retina = 3,
                       echo = TRUE, message = FALSE, error = FALSE, 
                       warning = FALSE)
 ```
+
+*Note: This is the solution for Q1 and Q2 of Vast Challenge MC2. To view solution for Q3, Q4, and Q5, please click here(https://linlizhong.netlify.app/posts/2021-07-25-vast-challenge-mc2/)*
 
 ## 1. Overview
 ### 1.1 Background
@@ -345,3 +347,5 @@ Anomaly 2. Weekend anomalies. The weekend is January 11th, 12th, 18th and 19th. 
 *Fig2.2 Suspicious Night Activity Detected by Car ID*
 
 Discrepancies between vehicle, credit and loyalty card data. I notice that there are 10 company cars had geospatial tracking data in the midnight (from 12am to 6am). There are 3 days, 7th, 11th, 14th, have more than one car driving path. 12th, 16th, and 19th have one car driving path. The result is a little bit different with analyzing credit and loyalty card data. Some car drivers may not buy anything when they go out, hence, only anlayzing expense records cannot notice these anomalies.
+
+This is not the end of the assignment. To view the solution for question 3, 4 and 5, please click here(https://linlizhong.netlify.app/posts/2021-07-25-vast-challenge-mc2/)
