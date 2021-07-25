@@ -20,7 +20,7 @@ knitr::opts_chunk$set(fig.retina = 3,
                       warning = FALSE)
 ```
 
-*Note: This is the solution for Q1 and Q2 of Vast Challenge MC2. To view solution for Q3, Q4, and Q5, please click here(https://linlizhong.netlify.app/posts/2021-07-25-assignment-mc2/)*
+*Note: This is the solution for Q4 and Q5 of Vast Challenge MC2. To view solution for Q1, Q2 and Q3, please click here(https://linlizhong.netlify.app/posts/2021-07-25-assignment-mc2/)*
 
 ## 1. Overview
 ### 1.1 Background
@@ -143,99 +143,16 @@ gps_path <- gps_sf %>%
   st_cast("LINESTRING")
 ```
 
-### 3.3 Question 3 
-
-**Can you infer the owners of each credit card and loyalty card? What is your evidence? Where are there uncertainties in your method? Where are there uncertainties in the data? Please limit your answer to 8 images and 500 words.**
-
-Before infer the owners of the credit card an loyalty card, I need to compute the gps data to match the location name in credit and loyalty card with longtitude and latitude and locate its location in map.
-
-The code chunk below is to compute the stay time in one place (same latitude and longitude). Then filter out the data with time difference more than 9,000s (2.5h) to find out the longitude and latitude of company and their home. To make things easier, I round longitude and latitude with four digits in the newly created gps table.
-
-```{r}
-gps_track <- read_csv("MC2/gps.csv")
-gps_track$id<-as.factor(gps$id)
-gps_track$Timestamp<-date_time_parse(gps_track$Timestamp,zone = "",
-                                     format = "%m/%d/%Y %H:%M:%S")
-
-gps4<- gps_track
-gps4<- dplyr::rename(gps4, arrival_time = Timestamp)
-gps4$date<-as.Date(format(gps4$arrival_time, "%Y-%m-%d"))
-gps4$day_of_week<-wday(gps4$arrival_time, label=TRUE)
-gps4 <- gps4[order(gps4$id,gps4$date,gps4$arrival_time), ]
-gps4 <- gps4 %>%
-  group_by(id) %>%
-  mutate(departure_time = lead(arrival_time))%>%
-  mutate(time_difference = departure_time - arrival_time)%>%
-  filter(time_difference >= 18000)
-gps4$arrival_time<-format(as.POSIXct(gps4$arrival_time), format = "%H:%M:%S")
-gps4$departure_time<-format(as.POSIXct(gps4$departure_time), format = "%H:%M:%S")
-
-gps5<-gps4%>%
-  relocate(id,date,day_of_week,arrival_time,departure_time,lat,long,time_difference)
-
-DT::datatable(gps5)%>%
-    formatRound(columns=c('long', 'lat'), digits=4)
-```
-
-```{r}
-gps_sf <- st_as_sf(gps5, coords = c("long", "lat"),crs= 4326)
-#Creating movement path from GPS points
-gps_path <- gps_sf %>%
-  group_by(id, date,day_of_week,time_difference,arrival_time,departure_time)
-gps_path_selected <- gps_path# %>%
-  #filter(date == "2014-01-07")
-tmap_mode("view")
-tm_shape(bgmap) +
-  tm_rgb(bgmap, r = 1,g = 2,b = 3,alpha = NA,saturation = 1,
-       interpolate = TRUE,max.value = 255) +
-  tm_shape(Abila_shape)+
-  tm_lines(col= "grey", lwd=1)+
-  tm_shape(gps_path_selected)+
-  tm_dots()
-```
-
-We can assume from the above table that (24.8796,36.0480) is the company's location in the map, because on weekdays, employees usually park their cars at this location in the morning and in the lunchtime, they drive to another place then back to this place again. Besides, after careful observation from the data table, I find employees arrive company before 9am and leave company around 12 o'clock in the morning, they eat lunch outside then go back to the office before 2pm and go back home or go shopping somewhere after 5.30pm. So we can filter the data on special time (working hours, midnight) from credit card and gps to infer the owner of the credit card and loyalty card.
-
-The below code chunk is to filter out the midnight transaction data and gps data. I order the newly created credit card table by its timstamp, so that I can find there are 5 transactions are made by midnight. 
-
-```{r}
-cc3<- cc 
-cc3$date<-as.Date(format(cc3$timestamp, "%Y-%m-%d"))
-cc3$timestamp<-format(as.POSIXct(cc3$timestamp), format = "%H:%M:%S")
-cc3<-cc3%>%
-  relocate(date,day,timestamp,price,location,last4ccnum)
-cc3 <- cc3[order(cc3$timestamp,cc3$date), ]
-cc3<- cc3%>%
-  filter(timestamp>="09:00:00"&timestamp<="12:00:00")
-  
-DT::datatable(cc3)
-```
-
-![](image/3.jpg){width=110%} 
-Becasue the format of timestamp in credit card dataset and loyalty card dataset is different, I try to change the format of credit card table with "%Y-%m-%d". Then I join these two tables and add a new row to check whether the employees use loyalty card or not.
-
-```{r}
-cc4<-cc
-cc4$timestamp<-format(cc$timestamp,format="%Y-%m-%d")
-lyt4<-lyt
-lyt4$timestamp<-format(lyt4$timestamp,format="%Y-%m-%d")
-cc_lyt<-merge(x=cc4,y=lyt4,all.x = TRUE)
-x <-if_else(is.na(cc_lyt$loyaltynum),"No","Yes")
-cc_lyt$use_loyalty<-x
-
-suspicious_cc<- c("9551", "8332", "3484","5407","8156")
-sus_day <- c(12,13,19)
-cc_lyt<-cc_lyt%>%
-  filter(day %in% sus_day, last4ccnum %in% suspicious_cc, 
-         location == "Kronos Mart")
-DT::datatable(cc_lyt)
-```
 
 ### 3.4 Question 4 
 
 **Given the data sources provided, identify potential informal or unofficial relationships among GASTech personnel. Provide evidence for these relationships. Please limit your response to 8 images and 500 words.**
 
 ```{r}
+gps_track <- read_csv("MC2/gps.csv")
+gps_track$id<-as.factor(gps$id)
+gps_track$Timestamp<-date_time_parse(gps_track$Timestamp,zone = "",
+                                     format = "%m/%d/%Y %H:%M:%S")
 gps5<- gps_track
 gps5<- dplyr::rename(gps5, arrival_time = Timestamp)
 gps5$date<-as.Date(format(gps5$arrival_time, "%Y-%m-%d"))
@@ -304,41 +221,11 @@ ggplotly(p6)
 
 ##4. MC2 Visualization Insights
 
-### 4.3 Question 3 
-
-**Can you infer the owners of each credit card and loyalty card? What is your evidence? Where are there uncertainties in your method? Where are there uncertainties in the data? Please limit your answer to 8 images and 500 words.**
-
-I infer the owners of each credit card and loyalty card by four steps.
-
-```{r}
-DT::datatable(cc_lyt)
-```
-*Fig3.1 Join Credit Card Table with Loyalty Card Table*
-
-Step 1: Join credit card and loyalty card table together. As credit card table and loyalty card table have similar variables, I left join loyalty card table with credit card table and add a new column called “use_loyalty” to check whether employees used loyalty card when they make transactions.
-
-![](image/10.jpg){width=70%} 
-
-*Fig3.2 Infer Home Address and Company Location*
-
-Step 2: Create a new table to calculate the time difference employees stayed in one place. I assume that employees would stay at home more than five hours in the night. So I filter out time difference more than 18,000s (5 hours) to detect each employee’s home address. For example, in Fig3.2, we can infer (24.8796,36.0065) is the home of the owner of company car 1. For the same method, I find (24.8796,36.0480) is the location of GAStech company. In later discuss, we can filter out these data to make things easier, because stay at home or in the company should not be suspicious in most of the time.
-
-![](image/11.jpg){width=90%} 
-
-*Fig3.3 Suspicious Transaction Time at midnight*
-
-![](image/14.jpg){width=90%}
-
-*Fig3.4 Suspicious Transaction Time at working hours*
-
-Step 3: Detect suspicious transaction time from credit card. Suspicious transaction time I mentioned here has two parts. Firstly, the transaction made at midnight. Employees may sleep during midnight. If someone’s car didn’t park near their home and have some transaction records in credit card, that will be highly suspicious. Secondly, as I view the data in gps, I assume the working hours in GAStech is from 9 o’clock to 12 o’clock in the morning, 2 o’clock to 5 o’clock in the afternoon. During this time period, if they didn’t at office, it will be marked as suspicious.
-
-Step 4: Use the suspicious time detected in step 3, filter the data in credit card and gps dataset, if the transaction time fall in the range of arrival time and departure time in the gps table, it will be a good match. Hence, I can infer the owner of the credit card and loyalty card in this way.
-
-
 ### 4.4 Question 4
 
 **Given the data sources provided, identify potential informal or unofficial relationships among GASTech personnel. Provide evidence for these relationships. Please limit your response to 8 images and 500 words.**
+
+Because Netlify and 
 
 ### 4.5 Question 5
 
@@ -363,6 +250,21 @@ Suspicious Activity 2. An analysis of the transactions per employee reveals that
 Suspicious activity 3. Here I filter out the night transactions made at Kronos Mart. All these five transactions didn’t use loyalty card. Were they afraid to record their peronsal information in their loyalty card? 
 
 ```{R}
+gps_sf <- st_as_sf(gps5, coords = c("long", "lat"),crs= 4326)
+#Creating movement path from GPS points
+gps_path <- gps_sf %>%
+  group_by(id, date,day_of_week,time_difference,arrival_time,departure_time)
+gps_path_selected <- gps_path# %>%
+  #filter(date == "2014-01-07")
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1,g = 2,b = 3,alpha = NA,saturation = 1,
+       interpolate = TRUE,max.value = 255) +
+  tm_shape(Abila_shape)+
+  tm_lines(col= "grey", lwd=1)+
+  tm_shape(gps_path_selected)+
+  tm_dots()
+
 tmap_mode("view")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1,g = 2,b = 3,alpha = NA,saturation = 1,
