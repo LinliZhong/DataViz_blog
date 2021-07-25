@@ -201,3 +201,100 @@ p3<-p3%>% layout(title = "Time of day vs location",
 ```{r fig.height = 5, fig.width = 5}
 p3
 ```
+
+### 3.2 Question 2 
+
+**Add the vehicle data to your analysis of the credit and loyalty card data. How does your assessment of the anomalies in question 1 change based on this new data? What discrepancies between vehicle, credit, and loyalty card data do you find? Please limit your answer to 8 images and 500 words.**
+
+The below code chunk is to visual the movement patter by company cars and company trucks, and they are faceted by employment type and truck car id respectively.
+
+```{r}
+gps1<-gps %>%
+  filter(!str_detect(gps$id, '101'),
+         !str_detect(gps$id, '104'),
+         !str_detect(gps$id, '105'),
+         !str_detect(gps$id, '106'),
+         !str_detect(gps$id, '107'))
+gps1<-left_join(gps1, car, by = c("id"="CarID"))
+
+p4 <- ggplot() +   
+      geom_point(data = gps1, 
+                   aes(x = long, y = lat,color = CurrentEmploymentType), 
+                   size = 0.4)+
+      facet_grid(day~CurrentEmploymentType) + theme_bw()
+```
+
+```{r fig.height = 10, fig.width = 12}
+p4 <- p4+ ggtitle(label = "Movement Patterns by Employment Type",
+                  subtitle = 'By company cars')+theme(
+  plot.title = element_text(color = "black",size = 20, face = "bold"),
+  plot.subtitle = element_text(size = 15))
+p4
+```
+
+```{r fig.height = 8, fig.width = 10}
+gps2<-gps %>%
+  filter(gps$car_type == "Company truck")
+
+p5 <- ggplot() +   
+      geom_point(data = gps2, 
+                   aes(x = long, y = lat,color = id), 
+                   size = 0.4)+
+      facet_grid(day~id) + theme_bw()
+p5 <- p5+ ggtitle(label = "Movement Patterns by Car ID",
+                  subtitle = 'By company trucks')+theme(
+  plot.title = element_text(color = "black",size = 20, face = "bold"),
+  plot.subtitle = element_text(size = 15))
+p5
+
+```
+
+In order to find out the discrepancies between vehicle, credit and loyalty card data, I draw a heatmap to visual the night activity from gps dataset.
+
+```{r}
+gps3<-gps
+gps3$Time_of_day <- cut(x=hour(gps3$Timestamp), breaks = breaks, labels = labels, include.lowest=TRUE)
+gps3$date_time<-paste(gps3$day,gps3$Time_of_day)
+gps3<-gps3%>%
+  filter(gps3$Time_of_day == "Night")
+
+p6<-ggplot(gps3, aes(date_time, id)) + 
+  geom_bin2d() + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+p6 <- p6 + theme(legend.position = "none")
+p6 <- ggplotly(p6)
+p6 <- p6 %>% layout(autosize = F, width = 800, height = 500)
+p6<-p6%>% layout(title = "Suspicious Night Activity Detected by Car ID",
+                                      xaxis = list(title = "",
+                                                   tickfont = list(size = 8)),
+                                      yaxis = list(title = "",
+                                                   tickfont = list(size = 8)))
+
+```
+
+```{r fig.height = 5, fig.width = 5}
+p6
+```
+
+```{r}
+#Import raster file
+bgmap <- raster("MC2/Geospatial/MC2-tourist.tif")
+# import the Abila shapefile
+Abila_layout <- "MC2/Geospatial/Abila.shp"
+Abila_shape <- readOGR(Abila_layout)
+#Plot raster layer
+tm_shape(bgmap) +
+tm_rgb(bgmap, r = 1,g = 2,b = 3,alpha = NA,
+       saturation = 1,interpolate = TRUE, max.value = 255)+
+  tm_shape(Abila_shape)+
+  tm_lines(col= "grey", lwd=1)
+#Import GIS data file
+Abila_st <- st_read(dsn = "MC2/Geospatial",
+                    layer = "Abila")
+#Converting aspatial data into a simple feature data frame
+gps_sf <- st_as_sf(gps, coords = c("long", "lat"),crs= 4326)
+#Creating movement path from GPS points
+gps_path <- gps_sf %>%
+  group_by(id, day) %>%
+  summarize(m = mean(Timestamp), do_union=FALSE) %>%
+  st_cast("LINESTRING")
+```
