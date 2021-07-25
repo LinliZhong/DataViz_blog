@@ -186,6 +186,46 @@ tm_shape(bgmap) +
 
 **Do you see evidence of suspicious activity? Identify 1- 10 locations where you believe the suspicious activity is occurring, and why Please limit your response to 10 images and 500 words.**
 
+### 3.4 Question 4 
+
+**Given the data sources provided, identify potential informal or unofficial relationships among GASTech personnel. Provide evidence for these relationships. Please limit your response to 8 images and 500 words.**
+
+```{r}
+gps_track <- read_csv("MC2/gps.csv")
+gps_track$id<-as.factor(gps$id)
+gps_track$Timestamp<-date_time_parse(gps_track$Timestamp,zone = "",
+                                     format = "%m/%d/%Y %H:%M:%S")
+
+gps_sf <- st_as_sf(gps5, coords = c("long", "lat"),crs= 4326)
+#Creating movement path from GPS points
+gps_path <- gps_sf %>%
+  group_by(id, date,day_of_week,time_difference,arrival_time,departure_time)
+gps_path_selected <- gps_path%>%
+  filter(date == "2014-01-07")
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1,g = 2,b = 3,alpha = NA,saturation = 1,
+       interpolate = TRUE,max.value = 255) +
+  tm_shape(Abila_shape)+
+  tm_lines(col= "grey", lwd=1)+
+  tm_shape(gps_path_selected)+
+  tm_dots()
+
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1,g = 2,b = 3,alpha = NA,saturation = 1,
+       interpolate = TRUE,max.value = 255) +
+  tm_shape(Abila_shape)+
+  tm_lines(col= "grey", lwd=1)+
+  tm_shape(gps_path_selected)+
+  tm_dots()
+```
+
+
+### 3.5 Question 5 
+
+**Do you see evidence of suspicious activity? Identify 1- 10 locations where you believe the suspicious activity is occurring, and why Please limit your response to 10 images and 500 words.**
+
 ```{r}
 p4<-plot_ly(data = cc, x = ~day, y=~price, marker = list(color = 'rgb(158,202,225)',
                            line = list(color = 'rgb(8,48,107)', width = 1.5)))
@@ -212,21 +252,22 @@ ggplotly(p6)
 ```
 
 
+
 ## 4. MC2 Visualization Insights
 
 ### 4.4 Question 4
 
 **Given the data sources provided, identify potential informal or unofficial relationships among GASTech personnel. Provide evidence for these relationships. Please limit your response to 8 images and 500 words.**
 
-Because of limited time and efforts, I choose "2014-01-11" as an example to show the unofficial relationships among GAStech personnel. 
+Because of limited time and efforts, I choose "2014-01-07" as an example to show the unofficial relationships among GAStech personnel. In this file we can find out who is in clusters in the same place then infer they may have unoffical relationships with each other.
 
 ```{R}
 gps_sf <- st_as_sf(gps5, coords = c("long", "lat"),crs= 4326)
 #Creating movement path from GPS points
 gps_path <- gps_sf %>%
   group_by(id, date,day_of_week,time_difference,arrival_time,departure_time)
-gps_path_selected <- gps_path# %>%
-  #filter(date == "2014-01-07")
+gps_path_selected <- gps_path %>%
+  filter(date == "2014-01-07")
 tmap_mode("view")
 tm_shape(bgmap) +
   tm_rgb(bgmap, r = 1,g = 2,b = 3,alpha = NA,saturation = 1,
@@ -280,3 +321,6 @@ Fig 5.5 shows the locations where customers stayed more than 5 hours in a day. F
 
 ![](image/16.jpg){width=90%}
 
+
+
+This is not the end of the assignment. To view the solution for question 4 and 5, please click here(https://linlizhong.netlify.app/posts/2021-07-25-vast-challenge-mc2/)
