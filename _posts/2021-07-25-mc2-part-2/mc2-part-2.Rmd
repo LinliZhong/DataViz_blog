@@ -145,7 +145,7 @@ gps_path <- gps_sf %>%
 ```
 
 
-
+## 3. MC2 Visualization Preparation
 ### 3.4 Question 4 
 
 **Given the data sources provided, identify potential informal or unofficial relationships among GASTech personnel. Provide evidence for these relationships. Please limit your response to 8 images and 500 words.**
@@ -170,7 +170,7 @@ gps5$arrival_time<-format(as.POSIXct(gps5$arrival_time), format = "%H:%M:%S")
 gps5$departure_time<-format(as.POSIXct(gps5$departure_time), format = "%H:%M:%S")
 ```
 
-```{r}
+
 gps6<-gps5%>%
   filter(id != "107"& id != "106"&id != "105"&
          id != "104"&id != "101")
@@ -190,7 +190,7 @@ tm_shape(bgmap) +
   tm_lines(col= "grey", lwd=1)+
   tm_shape(gps_path_selected2)+
   tm_dots() #+tm_facets(by = "date",ncol = 2)
-```
+
 
 ### 3.5 Question 5 
 
@@ -222,13 +222,15 @@ ggplotly(p6)
 ```
 
 
-##4. MC2 Visualization Insights
+## 4. MC2 Visualization Insights
 
 ### 4.4 Question 4
 
 **Given the data sources provided, identify potential informal or unofficial relationships among GASTech personnel. Provide evidence for these relationships. Please limit your response to 8 images and 500 words.**
 
-Because Netlify and 
+Because of limited time and efforts, I choose "2014-01-11" as an example to show the unofficial relationships among GAStech personnel. 
+
+From the maps draw before, 
 
 ### 4.5 Question 5
 
