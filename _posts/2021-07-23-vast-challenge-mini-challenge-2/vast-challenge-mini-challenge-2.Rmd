@@ -331,9 +331,9 @@ gps4 <- gps4 %>%
 gps4$arrival_time<-format(as.POSIXct(gps4$arrival_time), format = "%H:%M:%S")
 gps4$departure_time<-format(as.POSIXct(gps4$departure_time), format = "%H:%M:%S")
 
-
 gps5<-gps4%>%
   relocate(id,date,day_of_week,arrival_time,departure_time,lat,long,time_difference)
+
 DT::datatable(gps5)%>%
     formatRound(columns=c('long', 'lat'), digits=4)
 ```
@@ -349,7 +349,8 @@ cc3$timestamp<-format(as.POSIXct(cc3$timestamp), format = "%H:%M:%S")
 cc3<-cc3%>%
   relocate(date,day,timestamp,price,location,last4ccnum)
 cc3 <- cc3[order(cc3$timestamp,cc3$date), ]
-
+cc3<- cc3%>%
+  filter(timestamp>="09:00:00"&timestamp<="12:00:00")
   
 DT::datatable(cc3)
 ```
@@ -366,35 +367,16 @@ cc_lyt<-merge(x=cc4,y=lyt4,all.x = TRUE)
 x <-if_else(is.na(cc_lyt$loyaltynum),"No","Yes")
 cc_lyt$use_loyalty<-x
 
-suspicious_cc<- c("9551", "8332", "3484")
+suspicious_cc<- c("9551", "8332", "3484","5407","8156")
+sus_day <- c(12,13,19)
 cc_lyt<-cc_lyt%>%
-  filter(day == 19 & last4ccnum %in% suspicious_cc)
+  filter(day %in% sus_day, last4ccnum %in% suspicious_cc, 
+         location == "Kronos Mart")
 DT::datatable(cc_lyt)
 ```
 
 
-From the table above, we can find that the first 6 rows with suspicious transaction time. These are January 12th, 13th, and 19th. From the suspicious night activity by car id I drew before, 12th and 19th of January only have one company car's movement data. So I have evidence to infer that credit card 9551, 8332, 3484 belongs to the owner of car 28, and credit card 8156 belongs to car 29.
 
-
-```{r}
-gps5<- gps_track
-gps5<- dplyr::rename(gps5, arrival_time = Timestamp)
-gps5$date<-as.Date(format(gps5$arrival_time, "%Y-%m-%d"))
-gps5$day_of_week<-wday(gps5$arrival_time, label=TRUE)
-gps5 <- gps5[order(gps5$id,gps5$date,gps5$arrival_time), ]
-gps5 <- gps5 %>%
-  group_by(id) %>%
-  mutate(departure_time = lead(arrival_time))%>%
-  mutate(time_difference = departure_time - arrival_time)%>%
-  filter(time_difference >= 1)
-date1 <- as.POSIXct("2014-01-13 00:00:00") #lower bound
-date2 <- as.POSIXct("2014-01-13 06:29:59") #upper bound
-rng <- interval(date1,date2)         #desired range
-gps5 <- gps5[gps5$departure_time %within% rng,]
-gps5$arrival_time<-format(as.POSIXct(gps5$arrival_time), format = "%H:%M:%S")
-gps5$departure_time<-format(as.POSIXct(gps5$departure_time), format = "%H:%M:%S")
-DT::datatable(gps5)
-```
 
 ### 3.4 Question 4 
 
@@ -497,9 +479,15 @@ Step 2: Create a new table to calculate the time difference employees stayed in 
 
 ![](image/11.jpg){width=90%} 
 
-*Fig3.3 Suspicious Night Credit Card Transaction*
+*Fig3.3 Suspicious Transaction Time at midnight*
+
+![](image/14.jpg){width=90%}
+
+*Fig3.4 Suspicious Transaction Time at working hours*
 
 Step 3: Detect suspicious transaction time from credit card. Suspicious transaction time I mentioned here has two parts. Firstly, the transaction made at midnight. Employees may sleep during midnight. If someone’s car didn’t park near their home and have some transaction records in credit card, that will be highly suspicious. Secondly, as I view the data in gps, I assume the working hours in GAStech is from 9 o’clock to 12 o’clock in the morning, 2 o’clock to 5 o’clock in the afternoon. During this time period, if they didn’t at office, it will be marked as suspicious.
+
+Step 4: Use the suspicious time detected in step 3, filter the data in credit card and gps dataset, if the transaction time fall in the range of arrival time and departure time in the gps table, it will be a good match. Hence, I can infer the owner of the credit card and loyalty card in this way.
 
 
 ### 4.4 Question 4
@@ -516,3 +504,14 @@ Step 3: Detect suspicious transaction time from credit card. Suspicious transact
 
 Suspicious activity 1. I filter out the transaction records made at midnight. There are five transactions on 12th, 13th, and 19th. What I am curious about is all the credit card transactions at midnight are in the Kronos Mart. Does this store have special merchandise for sale? Or are these missing employees and suspects meeting at this place at midnight? 
 
+![](image/13.jpg){width=110%}
+
+*Fig 5.2 Suspicious Transaction Money*
+
+Suspicious Activity 2. An analysis of the transactions per employee reveals that Lucas Alcazar spent a large sum of money ($10,000) at Frydo's Autosupply n’ More. What products were bought in this transaction? 
+
+![](image/12.jpg){width=90%}
+
+*Fig 5.3 Suspicious Night Transactions*
+
+Suspicious activity 3. Here I filter out the night transactions made at Kronos Mart. All these five transactions didn’t use loyalty card. Were they afraid to record their peronsal information in their loyalty card? 
