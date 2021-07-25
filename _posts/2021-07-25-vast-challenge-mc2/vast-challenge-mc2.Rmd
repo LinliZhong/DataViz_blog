@@ -393,6 +393,48 @@ DT::datatable(cc_lyt)
 
 **Given the data sources provided, identify potential informal or unofficial relationships among GASTech personnel. Provide evidence for these relationships. Please limit your response to 8 images and 500 words.**
 
+```{r}
+
+```
+
+```{r}
+gps5<- gps_track
+gps5<- dplyr::rename(gps5, arrival_time = Timestamp)
+gps5$date<-as.Date(format(gps5$arrival_time, "%Y-%m-%d"))
+gps5$day_of_week<-wday(gps5$arrival_time, label=TRUE)
+gps5 <- gps5[order(gps5$id,gps5$date,gps5$arrival_time), ]
+gps5 <- gps5 %>%
+  group_by(id) %>%
+  mutate(departure_time = lead(arrival_time))%>%
+  mutate(time_difference = departure_time - arrival_time)#%>%
+gps5<-gps5%>%
+  filter(time_difference >= 300 & time_difference <=18000)
+gps5$arrival_time<-format(as.POSIXct(gps5$arrival_time), format = "%H:%M:%S")
+gps5$departure_time<-format(as.POSIXct(gps5$departure_time), format = "%H:%M:%S")
+```
+
+```{r}
+gps6<-gps5%>%
+  filter(id != "107"& id != "106"&id != "105"&
+         id != "104"&id != "101")
+gps6<-merge(x = gps6, y = car[ , c("Name", "CarID")], 
+            by.x='id', by.y='CarID')
+gps_sf <- st_as_sf(gps6, coords = c("long", "lat"),crs= 4326)
+#Creating movement path from GPS points
+gps_path <- gps_sf %>%
+  group_by(Name, id, date,day_of_week,time_difference,arrival_time,departure_time)
+gps_path_selected2 <- gps_path %>%
+  filter(date == "2014-01-11")
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1,g = 2,b = 3,alpha = NA,saturation = 1,
+       interpolate = TRUE,max.value = 255) +
+  tm_shape(Abila_shape)+
+  tm_lines(col= "grey", lwd=1)+
+  tm_shape(gps_path_selected2)+
+  tm_dots()
+```
+
 ### 3.5 Question 5 
 
 **Do you see evidence of suspicious activity? Identify 1- 10 locations where you believe the suspicious activity is occurring, and why Please limit your response to 10 images and 500 words.**
@@ -541,7 +583,7 @@ tm_shape(bgmap) +
 
 *Fig 5.4 Place Employees Stayed More Than 5 Hours in the past 14 days*
 
-![](image/15.jpg){width=90%}
+![](image/15.jpg){width=50%}
 
 *Fig 5.6 Example of Clusters*
 
