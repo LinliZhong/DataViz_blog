@@ -95,8 +95,6 @@ gps$day<-get_day(gps$Timestamp)
 ## 3. MC2 Visualization Preparation
 ### 3.1 Question 1 
 
-**Using just the credit and loyalty card data, identify the most popular locations, and when they are popular. What anomalies do you see? What corrections would you recommend to correct these anomalies? Please limit your answer to 8 images and 300 words.**
-
 The code chunk below is to create bar chart to find out the popular location for both credit card and loyalty card.
 
 ```{r}
@@ -378,6 +376,28 @@ cc3 <- cc3[order(cc3$timestamp,cc3$date), ]
 DT::datatable(cc3)
 ```
 
+![](image/3.jpg){width=110%} 
+Becasue the format of timestamp in credit card dataset and loyalty card dataset is different, I try to change the format of credit card table with "%Y-%m-%d". Then I join these two tables and add a new row to check whether the employees use loyalty card or not.
+
+```{r}
+cc4<-cc
+cc4$timestamp<-format(cc$timestamp,format="%Y-%m-%d")
+lyt4<-lyt
+lyt4$timestamp<-format(lyt4$timestamp,format="%Y-%m-%d")
+cc_lyt<-merge(x=cc4,y=lyt4,all.x = TRUE)
+x <-if_else(is.na(cc_lyt$loyaltynum),"No","Yes")
+cc_lyt$use_loyalty<-x
+
+suspicous_cc<- c("9551", "8332", "3484")
+cc_lyt<-cc_lyt%>%
+  filter(day == 19 & last4ccnum %in% suspicous_cc)
+DT::datatable(cc_lyt)
+```
+
+
+From the table above, we can find that the first 6 rows with suspicious transaction time. These are January 12th, 13th, and 19th. From the suspicious night activity by car id I drew before, 12th and 19th of January only have one company car's movement data. So I have evidence to infer that credit card 9551, 8332, 3484 belongs to the owner of car 28, and credit card 8156 belongs to car 29.
+
+
 ```{r}
 gps5<- gps_track
 gps5<- dplyr::rename(gps5, arrival_time = Timestamp)
@@ -388,11 +408,11 @@ gps5 <- gps5 %>%
   group_by(id) %>%
   mutate(departure_time = lead(arrival_time))%>%
   mutate(time_difference = departure_time - arrival_time)%>%
-  filter(time_difference >= 180)
-date1 <- as.POSIXct("2014-01-19 00:00:00") #lower bound
-date2 <- as.POSIXct("2014-01-19 05:59:59") #upper bound
+  filter(time_difference >= 1)
+date1 <- as.POSIXct("2014-01-13 00:00:00") #lower bound
+date2 <- as.POSIXct("2014-01-13 06:29:59") #upper bound
 rng <- interval(date1,date2)         #desired range
-gps5 <- gps5[gps5$arrival_time %within% rng,]
+gps5 <- gps5[gps5$departure_time %within% rng,]
 gps5$arrival_time<-format(as.POSIXct(gps5$arrival_time), format = "%H:%M:%S")
 gps5$departure_time<-format(as.POSIXct(gps5$departure_time), format = "%H:%M:%S")
 DT::datatable(gps5)
@@ -431,3 +451,23 @@ p6<-ggplot(cc, aes(x=location, y=price)) +
 ggplotly(p6)
 ```
 
+## 4. MC2 Visualization Insights
+### 4.1 Question 1 
+
+**Using just the credit and loyalty card data, identify the most popular locations, and when they are popular. What anomalies do you see? What corrections would you recommend to correct these anomalies? Please limit your answer to 8 images and 300 words.**
+
+### 4.2 Question 2 
+
+**Add the vehicle data to your analysis of the credit and loyalty card data. How does your assessment of the anomalies in question 1 change based on this new data? What discrepancies between vehicle, credit, and loyalty card data do you find? Please limit your answer to 8 images and 500 words.**
+
+### 4.3 Question 3 
+
+**Can you infer the owners of each credit card and loyalty card? What is your evidence? Where are there uncertainties in your method? Where are there uncertainties in the data? Please limit your answer to 8 images and 500 words.**
+
+### 4.4 Question 4
+
+**Given the data sources provided, identify potential informal or unofficial relationships among GASTech personnel. Provide evidence for these relationships. Please limit your response to 8 images and 500 words.**
+
+### 4.5 Question 5
+
+**Do you see evidence of suspicious activity? Identify 1- 10 locations where you believe the suspicious activity is occurring, and why Please limit your response to 10 images and 500 words.**
