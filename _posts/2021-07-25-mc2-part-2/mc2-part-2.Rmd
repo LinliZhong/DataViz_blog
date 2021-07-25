@@ -1,5 +1,5 @@
 ---
-title: "Vast Challenge MC2 II"
+title: "Vast Challenge MC2 (II)"
 description: |
   This blog is for the Vast Challenge 2021, Mini Challenge 2 Q3, Q4, and Q5.
 author:
@@ -101,24 +101,6 @@ gps$day<-get_day(gps$Timestamp)
 ```
 
 The code chunk below is the first part of vast challenge. 
-
-```{r}
-cc4<-cc
-cc4$timestamp<-format(cc$timestamp,format="%Y-%m-%d")
-lyt4<-lyt
-lyt4$timestamp<-format(lyt4$timestamp,format="%Y-%m-%d")
-cc_lyt<-merge(x=cc4,y=lyt4,all.x = TRUE)
-x <-if_else(is.na(cc_lyt$loyaltynum),"No","Yes")
-cc_lyt$use_loyalty<-x
-
-suspicious_cc<- c("9551", "8332", "3484","5407","8156")
-sus_day <- c(12,13,19)
-cc_lyt<-cc_lyt%>%
-  filter(day %in% sus_day, last4ccnum %in% suspicious_cc, 
-         location == "Kronos Mart")
-DT::datatable(cc_lyt)
-```
-
 
 ```{r}
 #Import raster file
