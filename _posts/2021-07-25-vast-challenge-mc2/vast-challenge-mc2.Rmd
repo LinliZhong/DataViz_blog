@@ -433,7 +433,7 @@ tm_shape(bgmap) +
   tm_lines(col= "grey", lwd=1)+
   tm_shape(gps_path_selected2)+
   tm_dots()+
-  tm_facets(by = "date")
+  tm_facets(by = "date",ncol = 2)
 ```
 
 ### 3.5 Question 5 
