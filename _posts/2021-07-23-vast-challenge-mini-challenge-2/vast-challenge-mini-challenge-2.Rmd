@@ -327,7 +327,7 @@ gps4 <- gps4 %>%
   group_by(id) %>%
   mutate(departure_time = lead(arrival_time))%>%
   mutate(time_difference = departure_time - arrival_time)%>%
-  filter(time_difference >= 9000)
+  filter(time_difference >= 18000)
 gps4$arrival_time<-format(as.POSIXct(gps4$arrival_time), format = "%H:%M:%S")
 gps4$departure_time<-format(as.POSIXct(gps4$departure_time), format = "%H:%M:%S")
 
@@ -493,7 +493,7 @@ DT::datatable(cc_lyt)
 
 **Do you see evidence of suspicious activity? Identify 1- 10 locations where you believe the suspicious activity is occurring, and why Please limit your response to 10 images and 500 words.**
 
-![](image/9.jpg){width=110%} 
+![](image/9.jpg){width=90%} 
 
 *Fig5.1 Suspicious Night Transactions by Credit Card*
 
