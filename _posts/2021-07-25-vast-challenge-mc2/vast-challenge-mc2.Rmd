@@ -299,6 +299,96 @@ gps_path <- gps_sf %>%
   st_cast("LINESTRING")
 ```
 
+### 3.3 Question 3 
+
+**Can you infer the owners of each credit card and loyalty card? What is your evidence? Where are there uncertainties in your method? Where are there uncertainties in the data? Please limit your answer to 8 images and 500 words.**
+
+Before infer the owners of the credit card an loyalty card, I need to compute the gps data to match the location name in credit and loyalty card with longtitude and latitude and locate its location in map.
+
+The code chunk below is to compute the stay time in one place (same latitude and longitude). Then filter out the data with time difference more than 9,000s (2.5h) to find out the longitude and latitude of company and their home. To make things easier, I round longitude and latitude with four digits in the newly created gps table.
+
+```{r}
+gps_track <- read_csv("MC2/gps.csv")
+gps_track$id<-as.factor(gps$id)
+gps_track$Timestamp<-date_time_parse(gps_track$Timestamp,zone = "",
+                                     format = "%m/%d/%Y %H:%M:%S")
+
+gps4<- gps_track
+gps4<- dplyr::rename(gps4, arrival_time = Timestamp)
+gps4$date<-as.Date(format(gps4$arrival_time, "%Y-%m-%d"))
+gps4$day_of_week<-wday(gps4$arrival_time, label=TRUE)
+gps4 <- gps4[order(gps4$id,gps4$date,gps4$arrival_time), ]
+gps4 <- gps4 %>%
+  group_by(id) %>%
+  mutate(departure_time = lead(arrival_time))%>%
+  mutate(time_difference = departure_time - arrival_time)#%>%
+gps4<-gps4%>%
+  filter(time_difference >= 18000)
+gps4$arrival_time<-format(as.POSIXct(gps4$arrival_time), format = "%H:%M:%S")
+gps4$departure_time<-format(as.POSIXct(gps4$departure_time), format = "%H:%M:%S")
+
+gps5<-gps4%>%
+  relocate(id,date,day_of_week,arrival_time,departure_time,lat,long,time_difference)
+
+DT::datatable(gps5)%>%
+    formatRound(columns=c('long', 'lat'), digits=4)
+```
+
+```{r}
+gps_sf <- st_as_sf(gps5, coords = c("long", "lat"),crs= 4326)
+#Creating movement path from GPS points
+gps_path <- gps_sf %>%
+  group_by(id, date,day_of_week,time_difference,arrival_time,departure_time)
+gps_path_selected <- gps_path# %>%
+  #filter(date == "2014-01-07")
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1,g = 2,b = 3,alpha = NA,saturation = 1,
+       interpolate = TRUE,max.value = 255) +
+  tm_shape(Abila_shape)+
+  tm_lines(col= "grey", lwd=1)+
+  tm_shape(gps_path_selected)+
+  tm_dots()
+```
+
+We can assume from the above table that (24.8796,36.0480) is the company's location in the map, because on weekdays, employees usually park their cars at this location in the morning and in the lunchtime, they drive to another place then back to this place again. Besides, after careful observation from the data table, I find employees arrive company before 9am and leave company around 12 o'clock in the morning, they eat lunch outside then go back to the office before 2pm and go back home or go shopping somewhere after 5.30pm. So we can filter the data on special time (working hours, midnight) from credit card and gps to infer the owner of the credit card and loyalty card.
+
+The below code chunk is to filter out the midnight transaction data and gps data. I order the newly created credit card table by its timstamp, so that I can find there are 5 transactions are made by midnight. 
+
+```{r}
+cc3<- cc 
+cc3$date<-as.Date(format(cc3$timestamp, "%Y-%m-%d"))
+cc3$timestamp<-format(as.POSIXct(cc3$timestamp), format = "%H:%M:%S")
+cc3<-cc3%>%
+  relocate(date,day,timestamp,price,location,last4ccnum)
+cc3 <- cc3[order(cc3$timestamp,cc3$date), ]
+cc3<- cc3%>%
+  filter(timestamp>="09:00:00"&timestamp<="12:00:00")
+  
+DT::datatable(cc3)
+```
+
+![](image/3.jpg){width=110%} 
+Becasue the format of timestamp in credit card dataset and loyalty card dataset is different, I try to change the format of credit card table with "%Y-%m-%d". Then I join these two tables and add a new row to check whether the employees use loyalty card or not.
+
+```{r}
+cc4<-cc
+cc4$timestamp<-format(cc$timestamp,format="%Y-%m-%d")
+lyt4<-lyt
+lyt4$timestamp<-format(lyt4$timestamp,format="%Y-%m-%d")
+cc_lyt<-merge(x=cc4,y=lyt4,all.x = TRUE)
+x <-if_else(is.na(cc_lyt$loyaltynum),"No","Yes")
+cc_lyt$use_loyalty<-x
+
+suspicious_cc<- c("9551", "8332", "3484","5407","8156")
+sus_day <- c(12,13,19)
+cc_lyt<-cc_lyt%>%
+  filter(day %in% sus_day, last4ccnum %in% suspicious_cc, 
+         location == "Kronos Mart")
+DT::datatable(cc_lyt)
+```
+
+
 ### 3.4 Question 4 
 
 **Given the data sources provided, identify potential informal or unofficial relationships among GASTech personnel. Provide evidence for these relationships. Please limit your response to 8 images and 500 words.**
@@ -331,3 +421,134 @@ p6<-ggplot(cc, aes(x = reorder(location,price), y=price)) +
              x = "Location", y = "Price")
 ggplotly(p6)
 ```
+
+
+## 4. MC2 Visualization Insights
+### 4.1 Question 1 
+
+**Using just the credit and loyalty card data, identify the most popular locations, and when they are popular. What anomalies do you see? What corrections would you recommend to correct these anomalies? Please limit your answer to 8 images and 300 words.**
+
+![](image/4.jpg){width=110%} 
+*Fig1.1 Detect Popular Locations*
+
+Popular locations are detected based on the number of transaction records in credit card. There are 4 locations have more than 150 transactions by credit card from January 6th to 19th. We can mark these 4 locations as popular locations. These four popular locations are *Katerina’s Café, Hippokampos, Guy's Gyros, and Brew've Been Served*. On top of that Katerina’s Café is the most popular location where these 44 missing employees like. 212 and 195 transactions were made by credit card and loyalty card in Katerina’s Café within 14 days. In average, there were around 15 transactions made by credit card per day in Katerina’s Café.
+
+![](image/5.jpg){width=110%} 
+*Fig1.2 Comparison of Four Popular Locations per Day*
+
+**Brew've Been Served** had three popular days from 6th January to 19th January. These three days are 8th, 10th, and 15th. Meanwhile, it had the same number of transactions (count 17 transactions) by tracing the missing employees’ credit card and loyalty card in these three days. However, on 11th and 12th January, this store didn’t have any transactions with missing employees.
+
+**Guy's Gyros** had two popular days within 14 days on 9th and 13th of January with 15 transactions with missing employees. These two days are around three times of the day on 11th, 12th and 18th with 4, 5, and 6 transactions respectively.
+
+**Hippokampos** also had two popular days on 6th and 16th of January but with different transactions in these two days. on January 6th it received 16 transactions and on January 16th it received one more transaction compared with January 6th. From January 16th to 19th, the overall transaction declined, reaching a 14-day low on the 19th.
+
+**Katerina’s Café** the most popular locations’ popular day was January 18th. It had 20 transactions in that day. But from 6th to 10th January, transaction volume in Katerina’s Café experienced substantially decrease to 11 transactions. Then jumped to 18 transactions and drop back to 11 transactions on January 12th. From 13th to 18th of January the number of transactions fluctuated steadily. On January 19th it plummeted to 9 transactions.
+
+![](image/6.jpg){width=110%} 
+*Fig1.3 Transaction Records in Credit Card by Time of the Day*
+
+Anomaly 1. At midnight (00.00 to 05.59) there are 5 transactions recored in Kronos Mart. All the transactions at midnight are in this store. I suggest investigating this mart, such as who they made these transactions, when they arrived and depatured at this place.
+
+![](image/7.jpg){width=110%}
+*Fig1.4 Transaction Records in Credit Card by Time of the Day*
+
+Anomaly 2. In the 14 dyas record of credit card, there are 2 transactions made in Frank’s Fuel and U-Pump, and 1 transactions made in Daily Dealz. In general, people are more inclined to spend in stores they are familiar with. I suggest police should investigate the motivation of employees to go to these three place and what they bought. Besides, for Frank’s Fuel and U-Pump, we should investigate whether these two transactions were made by one employee.
+
+### 4.2 Question 2 
+
+**Add the vehicle data to your analysis of the credit and loyalty card data. How does your assessment of the anomalies in question 1 change based on this new data? What discrepancies between vehicle, credit, and loyalty card data do you find? Please limit your answer to 8 images and 500 words.**
+
+![](image/2.jpg){width=110%} 
+*Fig2.1 Movement Patterns by Employment Type and Car ID*
+
+Anomaly 1. Weekday anomalies. The working days are from Monday to Friday, alternatively speaking, January 6th to 10th and 13th to 17th. Almost all the cars and trucks showed similar driving path on weekdays. But the driving path for executives on 15th, facilities on 17th, 107 on 7th is different than usual.
+
+Anomaly 2. Weekend anomalies. The weekend is January 11th, 12th, 18th and 19th. As company trucks were not used in these days, we only investigate the anomolies in company cars. Dislike weekdays, employees can drive cars to anywhere they want and from the graph, it doesn’t show similar patterns on these four days. But one thing is weird that on 19th January, Bertrand Ovan, staff who is the only missing facilities employees not belongs to truck drivers, didn’t go anywhere. Besides, information technology and security employees showed less frequent driving pattern on January 19th.
+
+![](image/8.jpg){width=110%} 
+*Fig2.2 Suspicious Night Activity Detected by Car ID*
+
+Discrepancies between vehicle, credit and loyalty card data. I notice that there are 10 company cars had geospatial tracking data in the midnight (from 12am to 6am). There are 3 days, 7th, 11th, 14th, have more than one car driving path. 12th, 16th, and 19th have one car driving path. The result is a little bit different with analyzing credit and loyalty card data. Some car drivers may not buy anything when they go out, hence, only anlayzing expense records cannot notice these anomalies.
+
+### 4.3 Question 3 
+
+**Can you infer the owners of each credit card and loyalty card? What is your evidence? Where are there uncertainties in your method? Where are there uncertainties in the data? Please limit your answer to 8 images and 500 words.**
+
+I infer the owners of each credit card and loyalty card by four steps.
+
+```{r}
+DT::datatable(cc_lyt)
+```
+*Fig3.1 Join Credit Card Table with Loyalty Card Table*
+
+Step 1: Join credit card and loyalty card table together. As credit card table and loyalty card table have similar variables, I left join loyalty card table with credit card table and add a new column called “use_loyalty” to check whether employees used loyalty card when they make transactions.
+
+![](image/10.jpg){width=70%} 
+
+*Fig3.2 Infer Home Address and Company Location*
+
+Step 2: Create a new table to calculate the time difference employees stayed in one place. I assume that employees would stay at home more than five hours in the night. So I filter out time difference more than 18,000s (5 hours) to detect each employee’s home address. For example, in Fig3.2, we can infer (24.8796,36.0065) is the home of the owner of company car 1. For the same method, I find (24.8796,36.0480) is the location of GAStech company. In later discuss, we can filter out these data to make things easier, because stay at home or in the company should not be suspicious in most of the time.
+
+![](image/11.jpg){width=90%} 
+
+*Fig3.3 Suspicious Transaction Time at midnight*
+
+![](image/14.jpg){width=90%}
+
+*Fig3.4 Suspicious Transaction Time at working hours*
+
+Step 3: Detect suspicious transaction time from credit card. Suspicious transaction time I mentioned here has two parts. Firstly, the transaction made at midnight. Employees may sleep during midnight. If someone’s car didn’t park near their home and have some transaction records in credit card, that will be highly suspicious. Secondly, as I view the data in gps, I assume the working hours in GAStech is from 9 o’clock to 12 o’clock in the morning, 2 o’clock to 5 o’clock in the afternoon. During this time period, if they didn’t at office, it will be marked as suspicious.
+
+Step 4: Use the suspicious time detected in step 3, filter the data in credit card and gps dataset, if the transaction time fall in the range of arrival time and departure time in the gps table, it will be a good match. Hence, I can infer the owner of the credit card and loyalty card in this way.
+
+
+### 4.4 Question 4
+
+**Given the data sources provided, identify potential informal or unofficial relationships among GASTech personnel. Provide evidence for these relationships. Please limit your response to 8 images and 500 words.**
+
+### 4.5 Question 5
+
+**Do you see evidence of suspicious activity? Identify 1- 10 locations where you believe the suspicious activity is occurring, and why Please limit your response to 10 images and 500 words.**
+
+![](image/9.jpg){width=90%} 
+
+*Fig5.1 Suspicious Night Transactions by Credit Card*
+
+Suspicious activity 1. I filter out the transaction records made at midnight. There are five transactions on 12th, 13th, and 19th. What I am curious about is all the credit card transactions at midnight are in the Kronos Mart. Does this store have special merchandise for sale? Or are these missing employees and suspects meeting at this place at midnight? 
+
+![](image/13.jpg){width=110%}
+
+*Fig 5.2 Suspicious Transaction Money*
+
+Suspicious Activity 2. An analysis of the transactions per employee reveals that Lucas Alcazar spent a large sum of money ($10,000) at Frydo's Autosupply n’ More. What products were bought in this transaction? 
+
+![](image/12.jpg){width=90%}
+
+*Fig 5.3 Suspicious Night Transactions*
+
+Suspicious activity 3. Here I filter out the night transactions made at Kronos Mart. All these five transactions didn’t use loyalty card. Were they afraid to record their peronsal information in their loyalty card? 
+
+```{R}
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1,g = 2,b = 3,alpha = NA,saturation = 1,
+       interpolate = TRUE,max.value = 255) +
+  tm_shape(Abila_shape)+
+  tm_lines(col= "grey", lwd=1)+
+  tm_shape(gps_path_selected)+
+  tm_dots()
+```
+
+*Fig 5.4 Place Employees Stayed More Than 5 Hours in the past 14 days*
+
+![](image/15.jpg){width=90%}
+
+*Fig 5.6 Example of Clusters*
+
+Fig 5.5 shows the locations where customers stayed more than 5 hours in a day. Fig 5.6 is the example of the home of the owner of car 10. In the Fig 5.5, if there are clusters with several dots in one place, I assume it is the home of the car owner.
+
+![](image/16.jpg){width=90%}
+
+*Fig 5.7 Suspicious Location*
+
+Suspicious activity 4. The above graph shows 7 suspicious places where employees stays more than 5 hours. Did they meet any others during the stay?
