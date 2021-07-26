@@ -1,7 +1,7 @@
 ---
 title: "Vast Challenge MC2 (I)"
 description: |
-  This blog is for the Vast Challenge 2021, Mini Challenge 2 Q1 and Q2.
+  This blog is for the Vast Challenge 2021, Mini Challenge 2 Q1, Q2, and Q3.
 author:
   - name: Linli Zhong
     url: https://github.com/LinliZhong
@@ -20,7 +20,7 @@ knitr::opts_chunk$set(fig.retina = 3,
                       warning = FALSE)
 ```
 
-*Note: This is the solution for Q1, Q2 and Q3 of Vast Challenge MC2. To view solution for Q4, and Q5, please click here(https://linlizhong.netlify.app/posts/2021-07-25-vast-challenge-mc2/)*
+*Note: This is the solution for Q1, Q2 and Q3 of Vast Challenge MC2. To view solution for Q4, and Q5, please click here(https://linlizhong.netlify.app/posts/2021-07-26-mc2-ii/)*
 
 ## 1. Overview
 ### 1.1 Background
@@ -474,3 +474,4 @@ Step 3: Detect suspicious transaction time from credit card. Suspicious transact
 
 Step 4: Use the suspicious time detected in step 3, filter the data in credit card and gps dataset, if the transaction time fall in the range of arrival time and departure time in the gps table, it will be a good match. Hence, I can infer the owner of the credit card and loyalty card in this way.
 
+This is not the end of the assignment. To view the solution for question 4 and 5, please click here(https://linlizhong.netlify.app/posts/2021-07-26-mc2-ii/)
