@@ -134,7 +134,7 @@ gps4 <- gps4 %>%
   group_by(id) %>%
   mutate(departure_time = lead(arrival_time))%>%
   mutate(time_difference = departure_time - arrival_time)%>%
-  filter(time_difference >= 60 & time_difference <= 18000 )
+  filter(time_difference >= 180 & time_difference <= 18000 )
 gps4$arrival_time<-format(as.POSIXct(gps4$arrival_time), format = "%H:%M:%S")
 gps4$departure_time<-format(as.POSIXct(gps4$departure_time), format = "%H:%M:%S")
 
@@ -170,6 +170,7 @@ map<-tm_shape(bgmap) +
   tm_facets(by = "date",ncol = 2)
 ```
 
+The above code is to draw the crowd of people who stay at one place more than 180s (3 minutes) but less than 18000s (5 hours). The reason I filter out the stay duration more than 5 hours is people may stay at home or at office.
 
 ### 3.5 Question 5 
 
@@ -207,7 +208,7 @@ ggplotly(p6)
 
 **Given the data sources provided, identify potential informal or unofficial relationships among GASTech personnel. Provide evidence for these relationships. Please limit your response to 8 images and 500 words.**
 
-Because of limited time and efforts, I choose "2014-01-07" as an example to show the unofficial relationships among GAStech personnel. In this file we can find out who is in clusters in the same place then infer they may have unoffical relationships with each other.
+Because of limited time and efforts, I choose "2014-01-11" as an example to show the unofficial relationships among GAStech personnel. In this file we can find out who is in clusters in the same place then infer they may have unofficial relationships with each other.
 
 ```{r}
 gps_path <- gps_sf %>%
@@ -230,3 +231,33 @@ tm_shape(bgmap) +
 **Do you see evidence of suspicious activity? Identify 1- 10 locations where you believe the suspicious activity is occurring, and why Please limit your response to 10 images and 500 words.**
 
 ![](image/9.jpg){width=90%} 
+
+*Fig5.1 Suspicious Night Transactions by Credit Card*
+
+Suspicious activity 1. I filter out the transaction records made at midnight. There are five transactions on 12th, 13th, and 19th. What I am curious about is all the credit card transactions at midnight are in the Kronos Mart. Does this store have special merchandise for sale? Or are these missing employees and suspects meeting at this place at midnight? 
+
+![](image/13.jpg){width=110%}
+
+*Fig 5.2 Suspicious Transaction Money*
+
+Suspicious Activity 2. An analysis of the transactions per employee reveals that Lucas Alcazar spent a large sum of money ($10,000) at Frydo's Autosupply n’ More. What products were bought in this transaction? 
+
+![](image/12.jpg){width=90%}
+
+*Fig 5.3 Suspicious Night Transactions*
+
+Suspicious activity 3. Here I filter out the night transactions made at Kronos Mart. All these five transactions didn’t use loyalty card. Were they afraid to record their peronsal information in their loyalty card? 
+
+
+*Fig 5.4 Place Employees Stayed More Than 5 Hours in the past 14 days*
+
+![](image/15.jpg){width=50%}
+
+*Fig 5.6 Example of Clusters*
+
+Fig 5.5 shows the locations where customers stayed more than 5 hours in a day. Fig 5.6 is the example of the home of the owner of car 10. In the Fig 5.5, if there are clusters with several dots in one place, I assume it is the home of the car owner.
+
+![](image/16.jpg){width=90%}
+
+
+This is not the end of the assignment. To view the solution for question 4 and 5, please click here(https://linlizhong.netlify.app/posts/2021-07-25-vast-challenge-mc2/)
