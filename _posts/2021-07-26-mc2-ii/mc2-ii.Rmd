@@ -115,3 +115,118 @@ Abila_st <- st_read(dsn = "MC2/Geospatial",
 ```
 
 
+## 3. MC2 Visualization Preparation
+### 3.4 Question 4 
+
+**Given the data sources provided, identify potential informal or unofficial relationships among GASTech personnel. Provide evidence for these relationships. Please limit your response to 8 images and 500 words.**
+
+```{r}
+gps_track <- read_csv("MC2/gps.csv")
+gps_track$id<-as.factor(gps$id)
+gps_track$Timestamp<-date_time_parse(gps_track$Timestamp,zone = "",
+                                     format = "%m/%d/%Y %H:%M:%S")
+gps4<- gps_track
+gps4<- dplyr::rename(gps4, arrival_time = Timestamp)
+gps4$date<-as.Date(format(gps4$arrival_time, "%Y-%m-%d"))
+gps4$day_of_week<-wday(gps4$arrival_time, label=TRUE)
+gps4 <- gps4[order(gps4$id,gps4$date,gps4$arrival_time), ]
+gps4 <- gps4 %>%
+  group_by(id) %>%
+  mutate(departure_time = lead(arrival_time))%>%
+  mutate(time_difference = departure_time - arrival_time)%>%
+  filter(time_difference >= 60 & time_difference <= 18000 )
+gps4$arrival_time<-format(as.POSIXct(gps4$arrival_time), format = "%H:%M:%S")
+gps4$departure_time<-format(as.POSIXct(gps4$departure_time), format = "%H:%M:%S")
+
+gps5<-gps4%>%
+  relocate(id,date,day_of_week,arrival_time,departure_time,lat,long,time_difference)
+```
+
+```{r}
+gps6<-gps5%>%
+  filter(id != "107"& id != "106"&id != "105"&
+         id != "104"&id != "101")
+gps6<-merge(x = gps6, y = car[ , c("Name", "CarID")], 
+            by.x='id', by.y='CarID')
+
+gps6<-gps5%>%
+  filter(id != "107"& id != "106"&id != "105"&
+         id != "104"&id != "101")
+gps6<-merge(x = gps6, y = car[ , c("Name", "CarID")], 
+            by.x='id', by.y='CarID')
+gps_sf <- st_as_sf(gps6, coords = c("long", "lat"),crs= 4326)
+#Creating movement path from GPS points
+gps_path <- gps_sf %>%
+  group_by(Name, id, date,day_of_week,time_difference,arrival_time,departure_time)
+gps_path_selected2 <- gps_path 
+tmap_mode("view")
+map<-tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1,g = 2,b = 3,alpha = NA,saturation = 1,
+       interpolate = TRUE,max.value = 255) +
+  tm_shape(Abila_shape)+
+  tm_lines(col= "grey", lwd=1)+
+  tm_shape(gps_path_selected2)+
+  tm_dots() +
+  tm_facets(by = "date",ncol = 2)
+```
+
+
+### 3.5 Question 5 
+
+**Do you see evidence of suspicious activity? Identify 1- 10 locations where you believe the suspicious activity is occurring, and why Please limit your response to 10 images and 500 words.**
+
+```{r}
+p4<-plot_ly(data = cc, x = ~day, y=~price, marker = list(color = 'rgb(158,202,225)',
+                           line = list(color = 'rgb(8,48,107)', width = 1.5)))
+p4 <- p4 %>% layout(title = "Total price per day by credit card",
+                                      xaxis = list(title = "Day"),
+                                      yaxis = list(title = "Total price"))
+
+p5<-plot_ly(data = lyt, x = ~day, y=~price, marker = list(color = 'rgb(158,202,225)',
+                           line = list(color = 'rgb(8,48,107)', width = 1.5)))
+p5<- p5 %>% layout(title = "Total price per day by loyalty card",
+                                      xaxis = list(title = "Day"),
+                                      yaxis = list(title = "Total price"))
+p4
+p5
+```
+
+```{r}
+p6<-ggplot(cc, aes(x = reorder(location,price), y=price)) + 
+    geom_boxplot(color = "deepskyblue4")+
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+    labs(title = "Single Transaction Price per Location",
+             x = "Location", y = "Price")
+ggplotly(p6)
+```
+
+
+## 4. MC2 Visualization Insights
+
+### 4.4 Question 4
+
+**Given the data sources provided, identify potential informal or unofficial relationships among GASTech personnel. Provide evidence for these relationships. Please limit your response to 8 images and 500 words.**
+
+Because of limited time and efforts, I choose "2014-01-07" as an example to show the unofficial relationships among GAStech personnel. In this file we can find out who is in clusters in the same place then infer they may have unoffical relationships with each other.
+
+```{r}
+gps_path <- gps_sf %>%
+  group_by(Name, id, date,day_of_week,time_difference,arrival_time,departure_time)
+gps_path_selected2 <- gps_path %>%
+  filter(date == "2014-01-11")
+tmap_mode("view")
+tm_shape(bgmap) +
+  tm_rgb(bgmap, r = 1,g = 2,b = 3,alpha = NA,saturation = 1,
+       interpolate = TRUE,max.value = 255) +
+  tm_shape(Abila_shape)+
+  tm_lines(col= "grey", lwd=1)+
+  tm_shape(gps_path_selected2)+
+  tm_dots() 
+```
+
+
+### 4.5 Question 5
+
+**Do you see evidence of suspicious activity? Identify 1- 10 locations where you believe the suspicious activity is occurring, and why Please limit your response to 10 images and 500 words.**
+
+![](image/9.jpg){width=90%} 
