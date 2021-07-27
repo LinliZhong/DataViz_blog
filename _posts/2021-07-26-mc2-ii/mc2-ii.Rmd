@@ -260,4 +260,4 @@ Fig 5.5 shows the locations where customers stayed more than 5 hours in a day. F
 ![](image/16.jpg){width=90%}
 
 
-This is not the end of the assignment. To view the solution for question 4 and 5, please click here(https://linlizhong.netlify.app/posts/2021-07-25-vast-challenge-mc2/)
+This is not the end of the assignment. To view the solution for question 1, 2 and 3, please click here(https://linlizhong.netlify.app/posts/2021-07-25-vast-challenge-mc2/)
